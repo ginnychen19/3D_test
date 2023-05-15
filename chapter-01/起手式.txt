@@ -1,0 +1,18 @@
+02-first-scene => three.js起手式
+    01.建立一個 Scene 物件
+    02.建立一個 Camera 物件,定義場景中的視角(Perspective)
+    03.建立一個 AxesHelper 物件 (查看世界中心點)
+    04.建立平面，使用 PlaneGeometry
+    05.建立立方體，使用 BoxGeometry
+    06.建立球體，使用 SphereGeometry
+    07.用camera.lookAt放入相機的position.x、y、z
+    08.最後rander出去，用.render(scene, camera);
+========================================
+03-materials-light => 加入材質、燈光、陰影效果
+    01.陰影的部分就是要先允許 Scene 物件有陰影效果,
+    然後設定有哪些物品可以接受陰影投射、那些可以投射陰影。
+    renderer.shadowMapEnabled = true; //允許 Scene 物件有陰影
+    場景物件.receiveShadow = true; //設置一個物體是否接收其他物體的陰影。
+    場景物件.castShadow = true; //設置一個物體是否投射陰影，不透明的物體就不會投射陰影
+
+
