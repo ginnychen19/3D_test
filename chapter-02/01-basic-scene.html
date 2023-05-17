@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 02.01 - Basic Scene</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+
+    <script type="text/javascript" src="../libs/stats.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
+
+    <script type="text/javascript">
+        function init() {
+            var stats = initStats();
+
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            scene.add(camera);
+            var renderer = new THREE.WebGLRenderer();
+            renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMapEnabled = true;
+            //地板
+            var planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1);
+            var planeMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+            var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.receiveShadow = true;
+            plane.rotation.x = -0.5 * Math.PI;
+            plane.position.set(0, 0, 0);
+            scene.add(plane);
+
+            //鏡頭位置
+            camera.position.set(-30, 40, 30);
+            camera.lookAt(scene.position);
+
+            //打环境光
+            var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+            scene.add(ambientLight);
+
+            //打直線光
+            var spotLight = new THREE.SpotLight(0xffffff);
+            spotLight.position.set(-40, 60, -10);
+            spotLight.castShadow = true;
+            scene.add(spotLight);
+
+            // add the output of the renderer to the html element
+            document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+            // call the render function
+            var step = 0;
+            // 控制器
+            var controls = new function () {
+                this.rotationSpeed = 0.02;
+                this.numberOfObjects = scene.children.length;//scene.children是指場景內的子物件們
+
+                this.removeCube = function () {//移除控制器
+                    var allChildren = scene.children;
+                    var lastObject = allChildren[allChildren.length - 1];
+                    if (lastObject instanceof THREE.Mesh) {//如果lastObject是THREE.Mesh的部分(因為可能刪到沒有會碰到攝影機之類的)
+                        scene.remove(lastObject);//移除lastObject
+                        this.numberOfObjects = scene.children.length;
+                    }
+                };
+
+                this.addCube = function () {//添加控制器
+                    var cubeSize = Math.ceil((Math.random() * 3));//Math.ceil無條件進位
+                    var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+                    var cubeMaterial = new THREE.MeshLambertMaterial({ color: Math.random() * 0xffffff });
+                    var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+                    cube.castShadow = true;
+                    cube.name = "cube-" + scene.children.length;//給每一個生成的方塊用編好命名
+                    // { color: Math.random() * 0xffffff } 可以生成範圍在 0 和 16777215 之間的隨機數
+                    /*
+                    在THREE.JS中，color 屬性的值可以是任何表示顏色的數值，
+                    例如十六進制值（0x000000 - 0xffffff）、RGB值（rgb(0, 0, 0) - rgb(255, 255, 255)）或者 HSL值（hsl(0, 0%, 0%) - hsl(360, 100%, 100%)）等等。
+                    因此，當我們在 THREE.MeshLambertMaterial() 中設置 color 屬性時，
+                    可以使用任何有效的顏色表示法，包括隨機生成的十六進制數字。
+                    */
+                    // position隨機位置，Math.round是取整數，* planeGeometry.parameters是為了要限制他會在地板的寬和高內。
+                    cube.position.x = -30 + Math.round((Math.random() * planeGeometry.parameters.width));
+                    cube.position.y = Math.round((Math.random() * 5));
+                    cube.position.z = -20 + Math.round((Math.random() * planeGeometry.parameters.height));
+
+                    // add the cube to the scene
+                    scene.add(cube);
+                    this.numberOfObjects = scene.children.length;
+                };
+
+                this.outputObjects = function () {
+                    console.log(scene.children);
+                }
+            };
+
+            var gui = new dat.GUI();
+            gui.add(controls, 'rotationSpeed', 0, 0.5);
+            gui.add(controls, 'addCube');
+            gui.add(controls, 'removeCube');
+            gui.add(controls, 'outputObjects');
+            gui.add(controls, 'numberOfObjects').listen();
+                                              //.listen() 监听该值的变化
+
+            render();
+
+            function render() {
+                stats.update();
+                // rotate the cubes around its axes
+                scene.traverse(function (e) {//traverse() 方法來遍歷場景中的每個物體，traverse() 是 THREE.js 中的方法
+                    if (e instanceof THREE.Mesh && e != plane) {
+                        e.rotation.x += controls.rotationSpeed;
+                        e.rotation.y += controls.rotationSpeed;
+                        e.rotation.z += controls.rotationSpeed;
+                    }
+                });
+                // render using requestAnimationFrame
+                requestAnimationFrame(render);
+                renderer.render(scene, camera);
+            }
+
+            function initStats() {
+                var stats = new Stats();
+                stats.setMode(0); // 0: fps, 1: ms
+                stats.domElement.style.position = 'absolute';
+                stats.domElement.style.left = '0px';
+                stats.domElement.style.top = '0px';
+                document.getElementById("Stats-output").appendChild(stats.domElement);
+                return stats;
+            }
+        }
+        window.onload = init
+
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 02.04 - Geometries</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+    <script type="text/javascript" src="../libs/ParametricGeometries.js"></script>
+    <script type="text/javascript" src="../libs/ConvexGeometry.js"></script>
+
+    <script type="text/javascript" src="../libs/stats.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+
+<div id="Stats-output">
+</div>
+<!-- Div which will hold the Output -->
+<div id="WebGL-output">
+</div>
+
+<script type="text/javascript">
+    function init() {
+        var stats = initStats();
+
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        
+        var renderer = new THREE.WebGLRenderer();
+        renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMapEnabled = true;
+
+        // 平面
+        var planeGeometry = new THREE.PlaneGeometry(60, 40, 1, 1);
+        var planeMaterial = new THREE.MeshLambertMaterial({color: 0xffffff});
+        var plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.receiveShadow = true;
+        
+        plane.rotation.x = -0.5 * Math.PI;
+        plane.position.set(0,0,0);
+        scene.add(plane);
+
+        // position and point the camera to the center of the scene
+        camera.position.set(-50,30,20);
+        camera.lookAt(new THREE.Vector3(-10, 0, 0));
+
+        // 打光
+        var ambientLight = new THREE.AmbientLight(0x090909);
+        scene.add(ambientLight);
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(-40, 40, 50);
+        spotLight.castShadow = true;
+        scene.add(spotLight);
+
+        // 這是一個方法，在底下
+        addGeometries(scene);
+
+        // add the output of the renderer to the html element
+        document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+        // call the render function
+        var step = 0;
+        render();
+        function addGeometries(scene) {
+            /*把所有模型都收到一個陣列裡*/
+            var geoms = [];
+            //六邊形
+            geoms.push(new THREE.CylinderGeometry( 1, 1, 2, 10 ));
+            // 一般盒子型
+            geoms.push(new THREE.BoxGeometry(2, 2, 2));
+            // 四面球體與三面球體
+            geoms.push(new THREE.SphereGeometry(2));
+            geoms.push(new THREE.IcosahedronGeometry(4));
+            // create a convex shape (a shape without dents)
+            // using a couple of points
+            // for instance a cube
+            var points = [ //用點做正方形
+                new THREE.Vector3(2, 2, 2),
+                new THREE.Vector3(2, 2, -2),
+                new THREE.Vector3(-2, 2, -2),
+                new THREE.Vector3(-2, 2, 2),
+                new THREE.Vector3(2, -2, 2),
+                new THREE.Vector3(2, -2, -2),
+                new THREE.Vector3(-2, -2, -2),
+                new THREE.Vector3(-2, -2, 2)
+            ];
+            geoms.push(new THREE.ConvexGeometry(points));
+            // 做一個沿路徑旋轉的圖案
+            //http://en.wikipedia.org/wiki/Lathe_(graphics)
+            var pts = [];//points array - the path profile points will be stored here
+            var detail = .1;//half-circle detail - how many angle increments will be used to generate points
+            var radius = 3;//radius for half_sphere
+            for (var angle = 0.0; angle < Math.PI; angle += detail)//loop from 0.0 radians to PI (0 - 180 degrees)
+            pts.push(new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius));//angle/radius to x,z
+            geoms.push(new THREE.LatheGeometry(pts, 10));
+            // 三面球體的另一種方式(大小)
+            geoms.push(new THREE.OctahedronGeometry(2));
+            /* THREE.ParametricGeometries.mobius3d 是一个预定义的函数，代表了一个莫比乌斯带（Mobius Strip）的形状。*/
+            geoms.push(new THREE.ParametricGeometry(THREE.ParametricGeometries.mobius3d, 20, 10));
+            //三角形
+            geoms.push(new THREE.TetrahedronGeometry(2));
+            //環形
+            geoms.push(new THREE.TorusGeometry(5, 1, 10, 10));
+            //扭結型
+            geoms.push(new THREE.TorusKnotGeometry(3, 0.5, 50, 20));
+
+            
+            var j = 0;
+            for (var i = 0; i < geoms.length; i++) {
+                //-------------------------------设置 wireframe: true 时，表示将物体渲染为线框模式
+                var cubeMaterial = new THREE.MeshLambertMaterial({wireframe: true, color: Math.random() * 0xffffff});
+                var materials = [//這邊是兩個都要上去
+                    //----------------------------shading這邊是決定要怎麼渲染有平面FlatShading或光滑SmoothShading
+                    new THREE.MeshLambertMaterial({color: Math.random() * 0xffffff, shading: THREE.FlatShading}),
+                    new THREE.MeshBasicMaterial({color: 0x000000, wireframe: true}) //這邊是指線框顏色
+                ];
+                //.SceneUtils.createMultiMaterialObject用來上同時的多個材質
+                var mesh = THREE.SceneUtils.createMultiMaterialObject(geoms[i], materials);
+                mesh.traverse(function (e) {
+                    e.castShadow = true;//讓物件可以接收陰影
+                });
+
+                // var mesh = new THREE.Mesh(geoms[i],materials[i]); //.mesh就是只能套一個的
+                // mesh.castShadow=true;
+                //阿這邊是讓陣列能有固定寬高排序的
+                mesh.position.x = -24 + ((i % 4) * 12);
+                mesh.position.y = 4;
+                mesh.position.z = -8 + (j * 12);
+
+                if ((i + 1) % 4 == 0) j++;
+                scene.add(mesh);
+            }
+
+        }
+
+        function render() {
+            stats.update();
+
+            // render using requestAnimationFrame
+            requestAnimationFrame(render);
+            renderer.render(scene, camera);
+        }
+
+        function initStats() {
+
+            var stats = new Stats();
+
+            stats.setMode(0); // 0: fps, 1: ms
+
+            // Align top-left
+            stats.domElement.style.position = 'absolute';
+            stats.domElement.style.left = '0px';
+            stats.domElement.style.top = '0px';
+
+            document.getElementById("Stats-output").appendChild(stats.domElement);
+
+            return stats;
+        }
+    }
+    window.onload = init
+
+
+</script>
+</body>
+</html>

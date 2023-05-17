@@ -1,4 +1,4 @@
-02-first-scene => three.js起手式
+02.-first-scene => three.js起手式
     01.建立一個 Scene 物件
     02.建立一個 Camera 物件,定義場景中的視角(Perspective)
     03.建立一個 AxesHelper 物件 (查看世界中心點)
@@ -7,12 +7,80 @@
     06.建立球體，使用 SphereGeometry
     07.用camera.lookAt放入相機的position.x、y、z
     08.最後rander出去，用.render(scene, camera);
+https://www.youtube.com/watch?v=9xS5LGUKIEM&list=PLcs9IXOXXJjWUpqJ_a-mYO4y853CeA_pU&pp=gAQBiAQB8AUB
+每一個幾乎都是這樣的順序
+初始化幾何Geometry
+初始化材質Material
+建立網格Mesh(幾何，材質)
+加入場景scene.add()
+
 ========================================
-03-materials-light => 加入材質、燈光、陰影效果
+03.-materials-light => 加入材質、燈光、陰影效果
     01.陰影的部分就是要先允許 Scene 物件有陰影效果,
-    然後設定有哪些物品可以接受陰影投射、那些可以投射陰影。
-    renderer.shadowMapEnabled = true; //允許 Scene 物件有陰影
-    場景物件.receiveShadow = true; //設置一個物體是否接收其他物體的陰影。
-    場景物件.castShadow = true; //設置一個物體是否投射陰影，不透明的物體就不會投射陰影
+    02.然後設定有哪些物品可以接受陰影投射、那些可以投射陰影。
+        renderer.shadowMapEnabled = true; //允許 Scene 物件有陰影
+        場景物件.receiveShadow = true; //設置一個物體是否接收其他物體的陰影。
+        場景物件.castShadow = true; //設置一個物體是否投射陰影，不透明的物體就不會投射陰影
 
+    然後還要加入一個燈光，記得燈光物件也要加上.castShadow = true;
+    幾本上如果開啟陰影模式，那沒打燈物件就是全黑
 
+    *設定position可以直接用.set(x,y,z);
+========================================
+04.-materials-light-animation => 加入動畫效果
+    stats是從外面引入的！！
+    01.要先建立 new 一個 Stats()物件
+    02.加入場景物件們
+    03.寫一個跑動畫用的function，並且使用requestAnimationFrame()讓他會一直重複執行
+    04.並且在重複執行的期間，用.update();一直時時更新到Stats()裡
+       (在執行動畫的 function 中，時時更新 Stats() 物件中的數據，例如每一偵的 FPS 或 MS 等。)
+
+這邊還有給Stats()物件用.domElement()直接渲染一個面板，以用來查看耗費效能等等
+在計算動畫的部分
+    01.使用三角函數（例如 Math.sin() 和 Math.cos()）來限制球體的移動範圍是一個常見的技巧。
+       (也可以用來創造運動曲線或是變換物體方向等等)
+    02.三角函數可以將任何數字映射到 -1 到 1 的範圍內。
+    03.最前面的數字就是可以想成是物件的初始位置，後面加上位移範圍的感覺
+        sphere.position.x = 20 + ( 10 * (Math.cos(step)));
+        sphere.position.y = 5 + ( 10 * Math.abs(Math.sin(step)));
+    04.Math.abs是取絕對值，加了的效果大概就是(x或y)只跑正數的區域這樣(半圈的感覺)。
+
+--------------------------------------------
+stats和dat.GUI不是Three.js的一部分，而是两个单独的JavaScript库。
+Stats是用于监测网页性能的JavaScript库，可以用于监测帧率、内存使用情况、渲染时间等指标，有助于优化WebGL程序。
+dat.GUI是一个用于在Web应用程序中创建可交互的图形用户界面的JavaScript库，可以用于调整场景中的参数，例如材质颜色、光源强度等，让用户可以即时预览修改效果。
+========================================
+05.-control-gui => 加入控制介面
+    01.dat.GUI()是 Three.js 引入的用戶界面套件
+       原文件 https://github.com/dataarts/dat.gui/blob/master/API.md ！
+        var controls = new function () {//加入方形旋轉、和圓球運動的速度
+            this.rotationSpeed = 0.02;
+            this.bouncingSpeed = 0.03;
+        };
+        var gui = new dat.GUI(); 
+        gui.add(controls, 'rotationSpeed', 0, 0.5);
+        gui.add(controls, 'bouncingSpeed', 0, 0.5);
+    02.改變速率的方式就是把我們自己設定的移動速度放進去
+       cube.rotation.x += controls.rotationSpeed;
+       step += controls.bouncingSpeed;
+    03..listen() 方法可以监听一个控件的值，
+        当该值发生变化时会调用一个回调函数
+        当场景中的物体数量发生变化时，该控件的值会自动更新
+    04.controls裡面設定的this後的名字，在add控件時不要打錯。
+       gui.add(controls, 'rotationSpeed', 0, 0.5);
+       gui.add(controls, 'addCube');
+
+========================================
+06.-screen-size-change => 場景對瀏覽器的自適應
+    01.把需要自適應的物件放到最上方宣告(camera、scene、renderer)
+    02.camera.aspect 決定了相機拍攝視景的橫向比例
+    03.我們使用updateProjectionMatrix()方法更新相機的投影矩陣
+    04.調整了渲染器的尺寸，使其填滿整個窗口。
+    05.設定事件，當瀏覽器窗口被縮放時，就會觸發resize事件
+
+    function onResize() { 
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+    window.addEventListener('resize', onResize, false);

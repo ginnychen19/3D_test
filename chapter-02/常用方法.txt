@@ -1,0 +1,106 @@
+生成、刪除、複製、霧、指定材質、創建幾何、不規則模型、物件屬性、攝影機設置
+===================================================================
+01.-basic-scene =>製作生成、刪除方塊的互動(隨機大小、顏色、位置)
+    01.cene.children是取得場景內的子物件們
+    02.隨機顏色的作法
+    { color: Math.random() * 0xffffff } 
+    可以生成範圍在 0 和 16777215 之間的隨機數
+    03.給方塊隨機位置
+    ---Math.round是取整數
+    ---* planeGeometry.parameters是為了要限制他會在地板的寬和高內。
+    cube.position.x = -30 + Math.round((Math.random() * planeGeometry.parameters.width));
+    cube.position.y = Math.round((Math.random() * 5));
+    cube.position.z = -20 + Math.round((Math.random() * planeGeometry.parameters.height));
+    04.traverse() 
+       方法來遍歷場景中的每個物體
+       traverse() 是 THREE.js 中的方法
+       所以不可以用JavaScript 中的 Array 方法。
+
+==================================================================
+02.-foggy-scene => 加入霧氣
+    01.有兩種，一種是.FogExp2、一種是.Fog，遞減算法不同
+       /*.Fog(顏色, 最近, 最遠)*/
+==================================================================
+03.-forced-materials => 強制設定材質
+    01.overrideMaterial 可以強制把所有物件都設定成同樣的材質
+==================================================================
+04.-geometries => 一次加入多個材質
+    01.引入套件ParametricGeometries、ConvexGeometry
+    02.SceneUtils.createMultiMaterialObject方法
+還有做到按一定位移排列這些模型、把模型放入一個數組，一次遍歷加入材質...
+==================================================================
+05.-custom-geometry =>點、面生成模型、複製模型
+                      (如何讓點面和控制器的內容能配合的即時更新)      
+    01.建立基本的渲染环境 
+    02.創建多材質對象（mesh）=>
+        a.var geom = new THREE.Geometry(); 
+            geom.vertices = vertices; 
+            geom.faces = faces;
+            geom.computeFaceNormals();
+        b.給geom套上複數材質
+        c.把mesh放到geom上
+
+    03.創建控制器和GUI =>
+        a.addControl(x, y, z)  //這個方法會把點帶入更新，並且回傳物件
+        b.gui中，我們先做了一個複製按鈕
+        c.接下來，我們addFolder，並且在裡面add加入三個點的控制器
+        d.資料從 controlPoints[i] 來，controlPoints裡存的是一個addControl的方法，就可以實現
+          控制面滿點擊時，會更新到controlPoints=>addControl的x、y、z資訊。
+
+    04.渲染循環 =>
+        a.最後當我們要持續循環渲染的時候，我們會把現在控制器上的數值(controlPoints)
+          加入到vertices裡
+        b.並且讓mesh接收這些更新過的位置，已達成時時轉換模型的效果。
+
+------------------------------------------------------------------
+我的問題主要是這些
+01.我不太清楚的點是03控制器這一段我的理解是不是對的。
+
+02.另外，在書裡有提到這段，在創建面的頂點時的創建順序，因為頂點順序決定某個面是面相攝影機還是背對攝影機
+   所以，創建面向攝影機的面時，頂點順序應該是順時針，反之則是逆時針。
+   參考這篇：
+   https://ithelp.ithome.com.tw/articles/10298455?fbclid=IwAR14yug-DLNQnlBDazlLjSmWYKfAHrKHdOZtHrZ8dBAKbBIGoTJHYjJSeW4
+
+03.喔還有，我記得一開始vertices、faces都有設定，那為何之後只要改vertices?
+   faces是會自動產生的嗎?
+
+
+==================================================================
+06.-custom-geometry => 模型控制旋轉、縮放、位移、移動
+    01.position => 設定絕對位置
+       然後不知為何，position還要在gui中多加上.listen()
+       因為其他數值都可以直接返回，但是position是Vector3對象的一員屬性。
+       而Three.js 默认不会监听 Vector3 对象的属性变化，
+       因此在控制器的回调函数中直接将分量的值赋给立方体的位置属性是不会实时更新的。
+       为了实现实时更新，你需要使用 .listen() 方法来告诉控制器监听 
+       positionX、positionY、positionZ 属性的变化，
+       并在变化时手动将这些值赋给立方体的位置属性。
+
+    02.rotation => 在Three.js中，旋转的值是以弧度表示的，而不是角度。
+       一般而言可以像這樣設定
+       cube.rotation.x = 0.5*Math.PI;
+       cube.rotation.set = (0.5*Math.PI,0,0);
+       cube.rotation.set = new THREE.Vector3(0.5*Math.PI,0,0);
+       如果要用角度做控制，就要做以下轉換
+       var degrees = 45;
+       var inRadians = degrees * (Math.PI / 180);
+
+       不過dat.GUI的rotation属性默认是弧度制，而不是角度制。
+       所以，如果你想要将角度转换为弧度，你需要使用THREE.Math.degToRad()函数。
+       例如，如果你想要将45度转换为弧度，你可以使用THREE.Math.degToRad(45)。
+    03.scale
+    04.translate => 設定相對位置
+    05.visible
+==================================================================
+07.-both-cameras => 攝影鏡頭的講解
+    01.可以注意THREE.Color 的构造函数接受的参数是三个浮点数，
+       分别表示红、绿和蓝的通道值，取值范围是从 0 到 1。
+       如果你有一个 RGB 值为 (20, 30, 40)，你可以将它转换为对应的范围在 0 到 1 之间的值。
+       例如，(20/255, 30/255, 40/255)。
+==================================================================
+08.-cameras-lookat => lookat鏡頭位移講解
+    01.var x = 10 + (100 * (Math.sin(step)));
+       //表示將範圍限制在0~1之間來回
+    02.camera.lookAt(new THREE.Vector3(x, 10, 0));
+       //讓camera看的位置是會動的
+    03.lookAtMesh.position.copy(new THREE.Vector3(x, 10, 0));
