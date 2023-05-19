@@ -84,3 +84,5 @@ dat.GUI是一个用于在Web应用程序中创建可交互的图形用户界面�
         renderer.setSize(window.innerWidth, window.innerHeight);
     }
     window.addEventListener('resize', onResize, false);
+
+    

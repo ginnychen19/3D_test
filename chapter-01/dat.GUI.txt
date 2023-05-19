@@ -1,0 +1,48 @@
+dat.GUI
+
+參考文件：
+https://zhuanlan.zhihu.com/p/47752059
+參考文件：
+http://www.yanhuangxueyuan.com/Three.js_course/datgui.html
+
+========================================
+01.控件會用一個new function ()做儲存
+   用this存放變數名，在add裡會的第二個函數的命名必須一樣
+
+    var controls = new function () {
+        this.rotationSpeed = 0.03;
+        this.bouncingSpeed = 0.03;
+    };
+    
+02.可以用add存放單一控件和addFolder生成資料夾
+   資料夾可以用先建一個變數存放addFolder參數
+   f1 = gui.addFolder('資料夾名稱');
+   // 再讓資料夾變數去承接add增加的控件
+   f1.add("控件存放區", "控件顯示的文字");
+--------------------------------------------
+控件形式
+    a.拖曳控件
+      folder.add(controls,'缩放系数',0.1,2.5);
+    b.拖曳控件.step()可以控制每次移動的部數。
+      folder.add(controls,'缩放系数',0.1,2.5).step(0.1);
+    c.文本下拉菜单，用陣列存
+      //属性值是字符串，所有的可能选项对应字符串使用中括号包裹
+      folder.add(controls,'缩放系数',['a','b','c']);
+    d.文本下拉菜单，要給值的話也可以用物件存
+      folder.add(controls,'转速',{低速: 0.005, 中速: 0.01,高速: 0.1});
+--------------------------------------------
+控件对象的属性值會影響到Gui介面是呈現什麼
+控件对象属性值的数据类型，
+会影响到GUI对象界面菜单选项的视觉效果
+和键鼠交互方式，
+前面程序案例中add方法关联的属性值都是Number，
+默认界面效果是鼠标滑动界面、下拉菜单等效果，
+具体对应哪一个还和add方法的参数有关。
+
+Number类型——slider、下拉菜单...
+Boolean类型——复选框
+Function类型——按钮
+String——文本输入框、下拉菜单
+============================================
+最常搞不清楚的是何時監聽
+.listen()  //.listen() 监听该值的变化

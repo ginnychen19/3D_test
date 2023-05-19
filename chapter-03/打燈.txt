@@ -1,0 +1,47 @@
+燈光有這幾種類型：
+  環境光 => ambient-light
+    基本光源，會影響物體顏色
+    不能獨立存在否則顏色會出不來、不會產生陰影
+  點光源 => point-light
+    拿來做路燈之類的，但不會讓物件生成陰影
+  聚光燈 => spot-light
+    從點發散光芒
+  平行光 => directional-light
+    無限光，模擬日照
+  半球光 => hemisphere-light
+    適合拿來做場景的漫反射，像是水、草的環境反射
+  區域光 => area-light
+    可以指定一個平面發散光，適合做窗戶之類的
+太陽光暈 => lensflares
+
+詳細的設定可以翻書three.js p.50
+==============================================
+基本上就是像這樣加入
+var pointColor = "#ccffcc";
+var pointLight = new THREE.PointLight(pointColor);
+
+pointLight.distance = 100;
+scene.add(pointLight);
+
+通常會需要加上ambient-light，和一個其他燈光
+記得燈光物件也要加上.castShadow = true;
+幾本上如果Sence開啟陰影模式，那沒打燈物件就是全黑
+==============================================
+渲染類型
+
+WebGLRenderer => 時時渲染
+可以实时更新场景，适用于动态交互和实时渲染需求。
+
+WebGLDeferredRenderer => 延遲渲染
+提供更多的配置选项和灵活性，以调整渲染流程和效果。可以提供更多選項
+brightness: 2.5 //可以直接調亮整體環境！！
+==============================================
+01.環境光 
+
+03.gui滿標準的設定方式
+可以直接透過spotLight.shadowCameraVisible取得spotLightCamera的實際樣子
+stopMovingLight//讓燈不要移動
+
+06.區域光 => area-light
+   01.在選這個光時，我們需要用比較高級的渲染類型
+      var renderer = new THREE.WebGLDeferredRenderer
