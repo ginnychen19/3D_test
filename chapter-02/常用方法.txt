@@ -52,19 +52,6 @@
           加入到vertices裡
         b.並且讓mesh接收這些更新過的位置，已達成時時轉換模型的效果。
 
-------------------------------------------------------------------
-我的問題主要是這些
-01.我不太清楚的點是03控制器這一段我的理解是不是對的。
-
-02.另外，在書裡有提到這段，在創建面的頂點時的創建順序，因為頂點順序決定某個面是面相攝影機還是背對攝影機
-   所以，創建面向攝影機的面時，頂點順序應該是順時針，反之則是逆時針。
-   參考這篇：
-   https://ithelp.ithome.com.tw/articles/10298455?fbclid=IwAR14yug-DLNQnlBDazlLjSmWYKfAHrKHdOZtHrZ8dBAKbBIGoTJHYjJSeW4
-
-03.喔還有，我記得一開始vertices、faces都有設定，那為何之後只要改vertices?
-   faces是會自動產生的嗎?
-
-
 ==================================================================
 06.-custom-geometry => 模型控制旋轉、縮放、位移、移動
     01.position => 設定絕對位置
@@ -99,6 +86,16 @@
        例如，(20/255, 30/255, 40/255)。
 
        其實可以接受不同类型的参数来表示颜色，包括字符串、十六进制值和RGB值。
+
+    A.透視投影相機（PerspectiveCamera）- 讓畫面中的遠近更符合真實世界
+    而其中的每一個參數依序代表：
+        視角（fov, field of view）：又稱為視野、視場，指的是我們能從畫面上看到的視野範圍，一般在遊戲中會設定在 60 ~ 90 度。
+        畫面寬高比（aspect）：渲染結果的畫面比例，一般都是使用 window.innerWidth / window.innerHeight 。
+        近面距離（near）：從距離相機多近的地方開始渲染，一般推薦使用 0.1。
+        遠面距離（far）：相機能看得多遠，一般推薦使用 1000，可視需求調整，設置過大會影響效能。
+        特別提一下 camera.lookAt ，這個屬性是指相機會盯著何處，一般靜止觀察的相機都是設定為 camera.lookAt(scene.position)，就是觀察場景固定的位置。但若今天你要讓相機動態追蹤某個物體，那你可以在渲染時改變 camera.lookeAt 中的參數為特定物體的某個基準座標，可以參考官網範例。
+    
+    B.
 ==================================================================
 08.-cameras-lookat => lookat鏡頭位移講解
     01.var x = 10 + (100 * (Math.sin(step)));
@@ -106,3 +103,71 @@
     02.camera.lookAt(new THREE.Vector3(x, 10, 0));
        //讓camera看的位置是會動的
     03.lookAtMesh.position.copy(new THREE.Vector3(x, 10, 0));
+
+==================================================================
+【OrbitControls（軌道控制器）】
+太讚了超方便，這是需要額外引入的套件，可以達成旋轉、平移、縮放
+旋轉：滑鼠左鍵按住拖移至欲旋轉的方向。
+平移：滑鼠右鍵按住拖移至欲平移的方向，或者也可以使用鍵盤方向鍵。
+縮放：滑鼠滾輪滾動。
+
+01.引入套件
+   https://threejs.org/examples/js/controls/OrbitControls.js
+02.加入設定
+   // 建立 OrbitControls
+   let cameraControl = new THREE.OrbitControls(camera);
+   cameraControl.enableDamping = true // 啟用阻尼效果
+   cameraControl.dampingFactor = 0.25 // 阻尼系數
+   cameraControl.autoRotate = true    // 啟用自動旋轉
+03.在render()中，要調用.update()
+   function render() {
+	    requestAnimationFrame(render)
+	    cameraControl.update() // 需設定 update
+	    renderer.render(scene, camera)
+    }
+=================================================================
+【模型是可以設定親屬關係的！】
+詳見：https://ithelp.ithome.com.tw/articles/10293480
+
+例如現在有兩個物件
+const parent = new THREE.Mesh(geometry, material);
+const child = new THREE.Mesh(geometry, material);
+我可以像這樣，把parent加到世界裡，把child加到parent裡
+scene.add(parent);
+parent.add(child);
+// 依據前面的說明，把parent位置改成10，child位置改成5
+parent.position.x = 10
+child.position.x = 5
+
+【矩陣變形】
+這部分是為了避免執行順序影響實際結果，所以這樣處理。
+天啊，矩陣變形好難懂，先直接背好了，我快瘋了
+詳見：https://ithelp.ithome.com.tw/articles/10294325
+位移、縮放、旋轉都可以用3x3的矩陣辦到
+
+01.給定單位矩陣（不會有變化）
+const matrixArray = [
+	1, 0, 0, 0,
+	0, 1, 0, 0,
+	0, 0, 1, 0,
+	0, 0, 0, 1
+]
+const matrix = new THREE.Matrix4().set(...matrixArray)
+cube.applyMatrix4(matrix)
+
+02.Matrix4的寫化寫法
+   A.makeRotationX, makeRotationY, makeRotationZ: 
+     給定一個弧度，它將回傳全新的旋轉矩陣
+     const rotateMatrix = new THREE.Matrix4().makeRotationY(Math.PI/4)
+     cube.applyMatrix4(rotateMatrix)
+   B.makeScale: 
+     給定一個縮放倍率
+     const scaleMatrix = new THREE.Matrix4().makeScale(2)
+     cube.applyMatrix4(scaleMatrix)
+   C.makeTranslation: 
+     給定一個位移，它將回傳全新的位移矩陣
+   const translationMatrix = new THREE.Matrix4().makeTranslation(5,0,0)
+   cube.applyMatrix4(scaleMatrix)
+   
+注意，這些都是回傳全新的喔，所以新的會覆蓋舊的。
+那要怎樣才能不互相覆蓋？再用乘的即可。

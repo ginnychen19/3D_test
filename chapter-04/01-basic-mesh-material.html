@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 04.01 - MeshBasicMaterial</title>
+    <script type="text/javascript" src="../libs/three.js"></script>
+    <script type="text/javascript" src="../libs/stats.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <script type="text/javascript" src="../libs/CanvasRenderer.js"></script>
+    <script type="text/javascript" src="../libs/Projector.js"></script>
+    <script type="text/javascript" src="../libs/OrbitControls.js"></script>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
+
+    <script type="text/javascript">
+        function init() {
+
+            var stats = initStats();
+
+        
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            var renderer;
+            //這邊設定了兩種Renderer，WebGL是比較強大的
+            var webGLRenderer = new THREE.WebGLRenderer();
+            webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
+            webGLRenderer.setSize(window.innerWidth, window.innerHeight);
+            webGLRenderer.shadowMapEnabled = true;
+            //Canvas 渲染器，使用 2D 上下文绘制图形和渲染场景
+            var canvasRenderer = new THREE.CanvasRenderer();
+            canvasRenderer.setSize(window.innerWidth, window.innerHeight);
+            renderer = webGLRenderer;
+            //地板
+            var groundGeom = new THREE.PlaneGeometry(100, 100, 4, 4);
+            var groundMesh = new THREE.Mesh(groundGeom, new THREE.MeshBasicMaterial({ color: 0x777777 }));
+            groundMesh.rotation.x = -Math.PI / 2;
+            groundMesh.position.y = -20;
+            scene.add(groundMesh);
+            // 加入地板、圓球、方塊
+            var sphereGeometry = new THREE.SphereGeometry(14, 20, 20);
+            var cubeGeometry = new THREE.BoxGeometry(15, 15, 15);
+            var planeGeometry = new THREE.PlaneGeometry(14, 14, 4, 4);
+            //給這三個設定基本材質
+            var meshMaterial = new THREE.MeshBasicMaterial({ color: 0x7777ff });
+            var sphere = new THREE.Mesh(sphereGeometry, meshMaterial);
+            var cube = new THREE.Mesh(cubeGeometry, meshMaterial);
+            var plane = new THREE.Mesh(planeGeometry, meshMaterial);
+            //給球體設定位置，讓方塊和地板一起引用
+            sphere.position.x = 0;
+            sphere.position.y = 3;
+            sphere.position.z = 2;
+            cube.position = sphere.position;
+            plane.position = sphere.position;
+            scene.add(cube);
+            // position camera
+            camera.position.x = -20;
+            camera.position.y = 50;
+            camera.position.z = 40;
+            camera.lookAt(new THREE.Vector3(10, 0, 0));
+
+            // // 建立 OrbitControls
+            // let cameraControl = new THREE.OrbitControls(camera)
+            // cameraControl.enableDamping = true // 啟用阻尼效果
+            // cameraControl.dampingFactor = 0.25 // 阻尼系數
+            // // cameraControl.autoRotate = true    // 啟用自動旋轉
+
+
+            // 加入燈光
+            var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+            scene.add(ambientLight);
+            //但這裡其實可以不用加其他燈，因為這材質不吃燈光效果
+
+            // 加入到html裡
+            document.getElementById("WebGL-output").appendChild(renderer.domElement);
+
+            // call the render function
+            var step = 0;
+            var oldContext = null;
+
+            var controls = new function () {
+                this.rotationSpeed = 0.02;
+                this.bouncingSpeed = 0.03;
+
+                this.opacity = meshMaterial.opacity;
+                this.transparent = meshMaterial.transparent;
+                this.overdraw = meshMaterial.overdraw;
+                this.visible = meshMaterial.visible;
+                this.side = "front";
+
+                this.color = meshMaterial.color.getStyle();
+                this.wireframe = meshMaterial.wireframe;
+                this.wireframeLinewidth = meshMaterial.wireframeLinewidth;
+                this.wireFrameLineJoin = meshMaterial.wireframeLinejoin;
+
+                this.selectedMesh = "cube";
+
+                this.switchRenderer = function () {
+                    if (renderer instanceof THREE.WebGLRenderer) {
+                        renderer = canvasRenderer;
+                        document.getElementById("WebGL-output").empty();
+                        document.getElementById("WebGL-output").appendChild(renderer.domElement);
+                    } else {
+                        renderer = webGLRenderer;
+                        document.getElementById("WebGL-output").empty();
+                        document.getElementById("WebGL-output").appendChild(renderer.domElement);
+                    }
+                }
+            };
+            
+            //切換面板
+            var gui = new dat.GUI();
+            var spGui = gui.addFolder("Mesh");
+            //加入.onChange是為了讓使用者控制介面的值時會回傳回去
+            //另外.onChange是Three.js提供的
+            spGui.add(controls, 'opacity', 0, 1).onChange(function (e) {
+                meshMaterial.opacity = e
+            });
+            spGui.add(controls, 'transparent').onChange(function (e) {
+                meshMaterial.transparent = e
+            });
+            spGui.add(controls, 'wireframe').onChange(function (e) {
+                meshMaterial.wireframe = e
+            });
+            //wireframeLinewidth設定了也不會改變，這是目前three.js的已知問題
+            spGui.add(controls, 'wireframeLinewidth', 0, 20).onChange(function (e) {
+                meshMaterial.wireframeLinewidth = e
+            });
+            spGui.add(controls, 'visible').onChange(function (e) {
+                meshMaterial.visible = e
+            });
+            spGui.add(controls, 'side', ["front", "back", "double"]).onChange(function (e) {
+                console.log("EWRFE");
+                switch (e) {//調映射位置用
+                    case "front":
+                        meshMaterial.side = THREE.FrontSide;
+                        break;
+                    case "back":
+                        meshMaterial.side = THREE.BackSide;
+                        break;
+                    case "double":
+                        meshMaterial.side = THREE.DoubleSide;
+                        break;
+                }
+                meshMaterial.needsUpdate = true;
+            });
+            spGui.addColor(controls, 'color').onChange(function (e) {
+                meshMaterial.color.setStyle(e)
+            });
+            spGui.add(controls, 'selectedMesh', ["cube", "sphere", "plane"]).onChange(function (e) {
+
+                scene.remove(plane);
+                scene.remove(cube);
+                scene.remove(sphere);
+
+                switch (e) {
+                    case "cube":
+                        scene.add(cube);
+                        break;
+                    case "sphere":
+                        scene.add(sphere);
+                        break;
+                    case "plane":
+                        scene.add(plane);
+                        break;
+
+                }
+                //scene.add(e);不能直接這樣寫，因為這邊的e帶入的是字串。
+            });
+
+            gui.add(controls, 'switchRenderer');
+            var cvGui = gui.addFolder("Canvas renderer");
+            cvGui.add(controls, 'overdraw').onChange(function (e) {
+                meshMaterial.overdraw = e
+                //overdraw是表示是否要超出線條渲染，以解決一些透明度計算和深度測試的問題
+                //只有Basic和Lambert可以用
+            });
+            cvGui.add(controls, 'wireFrameLineJoin', ['round', 'bevel', 'miter']).onChange(function (e) {
+                meshMaterial.wireframeLinejoin = e;
+                //對於線段相交處的外觀，但webGL渲染器不支援，而且要放很大材看得出來。
+                //有round(圓角)、bevel(斜角)、miter(尖角)
+            });
+
+
+            render();
+
+            function render() {
+                stats.update();
+                // cameraControl.update(); // 需設定 update
+                cube.rotation.y = step += 0.01;
+                plane.rotation.y = step;
+                sphere.rotation.y = step;
+
+                // render using requestAnimationFrame
+                requestAnimationFrame(render);
+                renderer.render(scene, camera);
+            }
+
+            function initStats() {
+
+                var stats = new Stats();
+
+                stats.setMode(0); // 0: fps, 1: ms
+
+
+                // Align top-left
+                stats.domElement.style.position = 'absolute';
+                stats.domElement.style.left = '0px';
+                stats.domElement.style.top = '0px';
+
+                document.getElementById("Stats-output").appendChild(stats.domElement);
+
+                return stats;
+            }
+        }
+        window.onload = init;
+    </script>
+</body>
+
+</html>

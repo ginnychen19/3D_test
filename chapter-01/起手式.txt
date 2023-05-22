@@ -7,12 +7,13 @@
     06.建立球體，使用 SphereGeometry
     07.用camera.lookAt放入相機的position.x、y、z
     08.最後rander出去，用.render(scene, camera);
-https://www.youtube.com/watch?v=9xS5LGUKIEM&list=PLcs9IXOXXJjWUpqJ_a-mYO4y853CeA_pU&pp=gAQBiAQB8AUB
-每一個幾乎都是這樣的順序
-初始化幾何Geometry
-初始化材質Material
-建立網格Mesh(幾何，材質)
-加入場景scene.add()
+
+    物體（Object）組成    
+    幾何體（Geometry）+ 材質（Material）
+    【一般建立物體的 SOP】 
+    就是宣告形狀（geometry）、材質（material），
+    然後用這兩個要素建立一個網格物件（mesh），
+    並設定其位置加到場景中便可完成。
 
 ========================================
 03.-materials-light => 加入材質、燈光、陰影效果
@@ -85,4 +86,3 @@ dat.GUI是一个用于在Web应用程序中创建可交互的图形用户界面�
     }
     window.addEventListener('resize', onResize, false);
 
-    
