@@ -97,7 +97,7 @@
 
 </script>
 
-    <script id="fragment-shader-2" type="x-shader/x-fragment">
+<script id="fragment-shader-2" type="x-shader/x-fragment">
     // from http://glsl.heroku.com/e#7906.0
 
 
@@ -347,28 +347,20 @@
 
     <!-- Javascript code that runs our Three.js examples -->
     <script type="text/javascript">
-
-        // once everything is loaded, we run our Three.js stuff.
         function init() {
 
             var stats = initStats();
-
-            // create a scene, that will hold all our elements such as objects, cameras and lights.
             var scene = new THREE.Scene();
-
-            // create a camera, which defines where we're looking at.
             var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-            // create a render and set the size
 
             var renderer = new THREE.WebGLRenderer();
             renderer.setClearColor(new THREE.Color(0x000000, 1.0));
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMapEnabled = true;
 
-
             var cubeGeometry = new THREE.BoxGeometry(20, 20, 20);
 
+            //存放多個面有各個shader
             var meshMaterial1 = createMaterial("vertex-shader", "fragment-shader-1");
             var meshMaterial2 = createMaterial("vertex-shader", "fragment-shader-2");
             var meshMaterial3 = createMaterial("vertex-shader", "fragment-shader-3");
@@ -436,21 +428,15 @@
 
 
             render();
-
             function render() {
                 stats.update();
-
                 cube.rotation.y = step += 0.01;
                 cube.rotation.x = step;
                 cube.rotation.z = step;
-
-
                 cube.material.materials.forEach(function (e) {
                     e.uniforms.time.value += 0.01;
                 });
-
-
-                // render using requestAnimationFrame
+                //這可能是用於控制動畫、變化或其他隨時間變化的視覺效果
                 requestAnimationFrame(render);
                 renderer.render(scene, camera);
             }
@@ -472,6 +458,7 @@
                 return stats;
             }
 
+            //定義了一個創建 ShaderMaterial 的函式 (頂點著色器、片元著色器的ID)
             function createMaterial(vertexShader, fragmentShader) {
                 var vertShader = document.getElementById(vertexShader).innerHTML;
                 var fragShader = document.getElementById(fragmentShader).innerHTML;

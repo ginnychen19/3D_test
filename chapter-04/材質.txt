@@ -10,6 +10,20 @@ transparent	▶ 設為 true 後，調 opacity 才有用。
        side ▶ 可以看要映射哪一面，THREE.FrontSide（外側）、THREE.BackSide（內側）、HREE.DoubleSide（兩側）
         map ▶ 貼圖屬性，可透過 THREE.TextureLoader() 載入圖片資源貼在幾何體上。
 needsUpdate ▶ 有用到不會自動更新的屬性就要。
+------------------------------------------------
+在透明度有開啟的狀態材可以使用
+     blending ▶ 有提供多種混和模式，
+                 THREE.NormalBlending：預設混合模式，將新像素顏色直接覆蓋在背景像素上。
+                 THREE.AdditiveBlending：將新像素顏色與背景像素進行相加，產生亮度增加的效果。
+                 THREE.SubtractiveBlending：將新像素顏色與背景像素進行減法運算，產生暗化效果。
+                 THREE.MultiplyBlending：將新像素顏色與背景像素進行乘法運算，產生顏色混合效果。
+                 THREE.CustomBlending：使用自定義的混合方程式進行混合，可以通過設置 blendSrc 和 blendDst 屬性來指定混合因子。
+                 THREE.AdditiveAlphaBlending：將新像素顏色與背景像素的透明度進行相加，用於透明度累加的效果。
+                 THREE.SubtractiveAlphaBlending：將新像素顏色與背景像素的透明度進行減法運算，產生透明度的減少效果。
+     
+     blendsrc ▶  決定了新像素顏色和背景像素顏色在混合過程中的權重。這些因子可以是像素的顏色、透明度或其他相關屬性。
+     blenddst ▶  同上
+blendequation ▶  用於指定混合運算中使用的數學方程式
 
 更高級的材質還可以設定像是
 反射率（specular）
@@ -25,11 +39,20 @@ needsUpdate ▶ 有用到不會自動更新的屬性就要。
 ================================================================
 【03.深度材質】THREE.MeshDepthMaterial
    --物體的深度亮暗（明暗）與攝影機的最近開始處和最遠結束處有關。
-這邊主要可以參考有調整cameraNear、和cameraFar的值，還有
+   這邊主要可以參考有調整cameraNear、和cameraFar的值，還有
 【03-1.深度材質可以在加上原材質！】
-
+   --可以注意混和模式(blending屬性)的使用，這邊是用像正片疊底MultiplyBlending
 ================================================================
-【04.normal材質】
+【04.normal材質】THREE.MeshNormalMaterial
+--根據模型的法向量信息來決定每個面的顏色，而不會考慮光照和陰影的計算。
+   01.FlatShading和SmoothShading
+      Flat：每個面的顏色都是均勻的，不考慮面上頂點的法向量。
+      Smooth：根據頂點的法向量插值計算每個像素的顏色，從而產生平滑的效果。
+   02.計算法向量，並加入箭頭
+      1.sphere.geometry.faces[f]可以取得物件的每個三角面
+      2.因為face會存到一個三角面，所以我才可以用face.a、b、c取得那些點
+      3.用centroid.divideScalar(3);算出他的重心
+      4.加入THREE.ArrowHelper
 ================================================================
 【05.面材質-一個物件多個顏色】
 但是請注意MeshFaceMaterial在three.js r125版本中已被弃用！！！
@@ -59,16 +82,42 @@ Scene.add(mesh)
 ================================================================
 【06.Lamber材質】
 不具有反射性質的材質球，但會對光源有反應
+比較特別的屬性有：
+   emissive：設定材質的自發光顏色，預設為黑色（0x000000）。
+   emissiveIntensity：設定自發光的強度，預設為 1。
+   wrapAround：勾選後，設定物體表面的反射環境光效果
+               記得這個要設定meshMaterial.needsUpdate = true;
+               可以設定wrapR(wrapRGB.x)、wrapG(wrapRGB.y)、wrapB(wrapRGB.z)
 ================================================================
 【07.phong材質】
 會自帶高光的材質
+比較特別的屬性有：
+   emissive：自發光
+   wrapAround：反射環境光
+   specular：材質的高光顏色
+   shininess：材質的光澤程度，值越大，則光滑度越高
+   metal：是否為金屬，布林值，會影響材質的光照反射行為
 ================================================================
-【07.自定義shader材質】
+【08.自定義shader材質】
+這邊的shader都是先引用網路上的，且會涉及WebGL的寫法，所以先不仔細看
+這邊一樣用.MeshFaceMaterial放入多個面的材質。
+主要可以看createMaterial是如何把著色器的顏色內容讓Material接收
 ================================================================
-【08.線段幾何體材質】
+【09.線段幾何體材質】
 有兩種A.THREE.LineBasicMaterial()、B.THREE.LineDashedMaterial()
+加入線段幾何體的方式是：
+   01.var line = new THREE.Line(lines, material);
+Dashed主要差在這：
+   lines.computeLineDistances();//用於計算線條的距離
+      var material = new THREE.LineDashedMaterial({
+            vertexColors: true,
+            color: 0xffffff,
+            dashSize: 1, //表示虛線的每一段的長度
+            gapSize: 1, //間隔長度
+            scale: 0.1
+      });
 ================================================================
-近期還有更新
+近期還有更新兩材質
 【MeshStandardMaterial】
 可以設定金屬感（metalness）與粗糙度（roughness）
 

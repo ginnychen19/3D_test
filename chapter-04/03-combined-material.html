@@ -73,16 +73,15 @@
             };
 
             this.addCube = function () {
-                var cubeSize = Math.ceil(3 + (Math.random() * 3));
+                var cubeSize = Math.ceil(3 + (Math.random() * 3));//.ceil回傳最小整數
                 var cubeGeometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-
-                //var cubeMaterial = new THREE.MeshLambertMaterial({color:  Math.random() * 0xffffff });
                 var cubeMaterial = new THREE.MeshDepthMaterial();
                 var colorMaterial = new THREE.MeshBasicMaterial({
                     color: controls.color,
                     transparent: true,
-                    blending: THREE.MultiplyBlending
+                    blending: THREE.MultiplyBlending //正片疊底
                 });
+                //.SceneUtils.createMultiMaterialObject用來上同時的多個材質
                 var cube = new THREE.SceneUtils.createMultiMaterialObject(cubeGeometry, [colorMaterial, cubeMaterial]);
                 cube.children[1].scale.set(0.99, 0.99, 0.99);
                 cube.castShadow = true;

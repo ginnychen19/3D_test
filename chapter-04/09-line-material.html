@@ -30,45 +30,36 @@
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var renderer = new THREE.WebGLRenderer();
-
         renderer.setClearColor(new THREE.Color(0x000000, 1.0));
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.shadowMapEnabled = true;
-
-
-        // position and point the camera to the center of the scene
+        // position camera 
         camera.position.x = -30;
         camera.position.y = 40;
         camera.position.z = 30;
         camera.lookAt(scene.position);
 
-        // add subtle ambient lighting
+        // 打光
         var ambientLight = new THREE.AmbientLight(0x0c0c0c);
         scene.add(ambientLight);
-
-        // add spotlight for the shadows
         var spotLight = new THREE.SpotLight(0xffffff);
         spotLight.position.set(-40, 60, -10);
         spotLight.castShadow = true;
         scene.add(spotLight);
 
         // get the turtle
-        var points = gosper(4, 60);
-
+        var points = gosper(3, 60);
+        //gosper是一種線條型狀
+        //方法在下面，但我現在不需要會畫
 
         var lines = new THREE.Geometry();
-        var colors = [];
+        var colors = [];//colors 陣列，用於存儲每個頂點的顏色。
         var i = 0;
         points.forEach(function (e) {
+            /* 給每個點顏色 */
             lines.vertices.push(new THREE.Vector3(e.x, e.z, e.y));
             colors[i] = new THREE.Color(0xffffff);
             colors[i].setHSL(e.x / 100 + 0.5, (  e.y * 20 ) / 300, 0.8);
@@ -79,10 +70,10 @@
         var material = new THREE.LineBasicMaterial({
             opacity: 1.0,
             linewidth: 1,
-            vertexColors: THREE.VertexColors
+            vertexColors: THREE.VertexColors //這邊是設定用頂點著色器
         });
 
-        var line = new THREE.Line(lines, material);
+        var line = new THREE.Line(lines, material); //這裡是添加線模型
         line.position.set(25, -30, -60);
         scene.add(line);
 
@@ -101,15 +92,12 @@
             renderer.render(scene, camera);
         }
 
-        function gosper(a, b) {
-
+        function gosper(a, b) {//算圖案用的
             var turtle = [0, 0, 0];
             var points = [];
             var count = 0;
 
             rg(a, b, turtle);
-
-
             return points;
 
             function rt(x) {

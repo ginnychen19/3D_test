@@ -34,35 +34,28 @@
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
 
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var renderer;
+        /* 也是給兩種渲染模式 */
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
-
         var canvasRenderer = new THREE.CanvasRenderer();
         canvasRenderer.setSize(window.innerWidth, window.innerHeight);
         renderer = webGLRenderer;
-
+        //地板
         var groundGeom = new THREE.PlaneGeometry(100, 100, 4, 4);
         var groundMesh = new THREE.Mesh(groundGeom, new THREE.MeshBasicMaterial({color: 0x555555}));
         groundMesh.rotation.x = -Math.PI / 2;
         groundMesh.position.y = -20;
         scene.add(groundMesh);
-
+        //要做切換，所以也都先設好
         var sphereGeometry = new THREE.SphereGeometry(14, 20, 20);
         var cubeGeometry = new THREE.BoxGeometry(15, 15, 15);
         var planeGeometry = new THREE.PlaneGeometry(14, 14, 4, 4);
-
-
         var meshMaterial = new THREE.MeshLambertMaterial({color: 0x7777ff});
         var sphere = new THREE.Mesh(sphereGeometry, meshMaterial);
         var cube = new THREE.Mesh(cubeGeometry, meshMaterial);
@@ -72,26 +65,21 @@
         sphere.position.x = 0;
         sphere.position.y = 3;
         sphere.position.z = 2;
-
-
         cube.position = sphere.position;
         plane.position = sphere.position;
-
 
         // add the sphere to the scene
         scene.add(cube);
 
-        // position and point the camera to the center of the scene
+        // position camera 
         camera.position.x = -20;
         camera.position.y = 30;
         camera.position.z = 40;
         camera.lookAt(new THREE.Vector3(10, 0, 0));
 
-        // add subtle ambient lighting
+        //加燈光
         var ambientLight = new THREE.AmbientLight(0x0c0c0c);
         scene.add(ambientLight);
-
-        // add spotlight for the shadows
         var spotLight = new THREE.SpotLight(0xffffff);
         spotLight.position.set(-30, 60, 60);
         spotLight.castShadow = true;
@@ -102,7 +90,7 @@
 
         // call the render function
         var step = 0;
-
+        
         var controls = new function () {
             this.rotationSpeed = 0.02;
             this.bouncingSpeed = 0.03;
@@ -111,8 +99,15 @@
             this.transparent = meshMaterial.transparent;
             this.overdraw = meshMaterial.overdraw;
             this.visible = meshMaterial.visible;
-            this.emissive = meshMaterial.emissive.getHex();
+            this.emissive = meshMaterial.emissive.getHex();//物體表面自發光
             this.ambient = meshMaterial.ambient.getHex();
+            /*
+            这是该材质的环境色。
+            和AmbientLight光源一起使用，
+            这个颜色会和AmbientLight光源的颜色相乘，
+            默认是白色
+            */
+            //.getHex()是轉換為十六進制數值
             this.side = "front";
 
             this.color = meshMaterial.color.getStyle();
@@ -130,6 +125,7 @@
 
         var spGui = gui.addFolder("Mesh");
         spGui.add(controls, 'opacity', 0, 1).onChange(function (e) {
+            console.log(meshMaterial);
             meshMaterial.opacity = e
         });
         spGui.add(controls, 'transparent').onChange(function (e) {
@@ -192,6 +188,8 @@
             meshMaterial.needsUpdate = true;
         });
 
+        //這幾個屬性在這裡可以看到，但新版本好像不支援了
+        //注：属性ambient、wrapAround、wrapRGB 不知从哪个版本开始废弃掉了，反正v119没有这几个属性
         spGui.add(controls, 'wrapR', 0, 1).step(0.01).onChange(function (e) {
             meshMaterial.wrapRGB.x = e;
         });
@@ -202,7 +200,6 @@
 
         spGui.add(controls, 'wrapB', 0, 1).step(0.01).onChange(function (e) {
             meshMaterial.wrapRGB.z = e;
-
         });
 
         render();

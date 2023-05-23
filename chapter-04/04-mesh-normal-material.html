@@ -34,14 +34,8 @@
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var renderer;
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
@@ -51,19 +45,17 @@
         var canvasRenderer = new THREE.CanvasRenderer();
         canvasRenderer.setSize(window.innerWidth, window.innerHeight);
         renderer = webGLRenderer;
-
+        //地板
         var groundGeom = new THREE.PlaneGeometry(100, 100, 4, 4);
         var groundMesh = new THREE.Mesh(groundGeom, new THREE.MeshBasicMaterial({color: 0x777777}));
         groundMesh.rotation.x = -Math.PI / 2;
         groundMesh.position.y = -20;
         scene.add(groundMesh);
-
+        //一樣先建立三種，之後再替換模型
         var sphereGeometry = new THREE.SphereGeometry(14, 20, 20);
         var cubeGeometry = new THREE.BoxGeometry(15, 15, 15);
         var planeGeometry = new THREE.PlaneGeometry(14, 14, 4, 4);
-
-
-        var meshMaterial = new THREE.MeshNormalMaterial({color: 0x7777ff});
+        var meshMaterial = new THREE.MeshNormalMaterial({color: "#7777ff"});
         var sphere = new THREE.Mesh(sphereGeometry, meshMaterial);
         var cube = new THREE.Mesh(cubeGeometry, meshMaterial);
         var plane = new THREE.Mesh(planeGeometry, meshMaterial);
@@ -73,21 +65,26 @@
         sphere.position.y = 3;
         sphere.position.z = 2;
 
+        //查看法向量用
         for (var f = 0, fl = sphere.geometry.faces.length; f < fl; f++) {
-            var face = sphere.geometry.faces[f];
-            var centroid = new THREE.Vector3(0, 0, 0);
+            //sphere.geometry.faces，球體模型的每個面
+            var face = sphere.geometry.faces[f];//f就是一個三角面
+            var centroid = new THREE.Vector3(0, 0, 0);//確保每次都是一個空的位置
+            //因為每個面都是三角面所以取三個點獲得重心
             centroid.add(sphere.geometry.vertices[face.a]);
             centroid.add(sphere.geometry.vertices[face.b]);
             centroid.add(sphere.geometry.vertices[face.c]);
-            centroid.divideScalar(3);
-
+            centroid.divideScalar(3);//這一步讓centroid的值變成重心
+            //當將三個頂點的位置相加後，再除以 3，就可以得到三個頂點的平均位置，也就是該三角形的重心位置。
             var arrow = new THREE.ArrowHelper(
-                    face.normal,
-                    centroid,
-                    2,
+                    face.normal,//面的法向量，它指示面的朝向，可以使用任何 THREE.Vector3 類型的向量來指定箭頭的方向。
+                    //以使用 new THREE.Vector3(1, 0, 0) 來指定箭頭在 x 軸方向上
+                    centroid,//表示面的重心位置
+                    2,//箭頭的長度
                     0x3333FF,
-                    0.5,
-                    0.5);
+                    0.3,//箭頭頭部的長度與箭頭長度的比例
+                    0.5 //箭頭頭部的寬度與箭頭長度的比例
+                    );
             sphere.add(arrow);
         }
 
@@ -105,15 +102,7 @@
         camera.position.z = 40;
         camera.lookAt(new THREE.Vector3(10, 0, 0));
 
-        // add subtle ambient lighting
-        var ambientLight = new THREE.AmbientLight(0x0c0c0c);
-        scene.add(ambientLight);
-
-        // add spotlight for the shadows
-        var spotLight = new THREE.SpotLight(0xffffff);
-        spotLight.position.set(-40, 60, -10);
-        spotLight.castShadow = true;
-        scene.add(spotLight);
+        //光都刪掉了，因為不會影響
 
         // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(renderer.domElement);
@@ -177,16 +166,23 @@
 
         });
         spGui.add(controls, 'shadow', ["flat", "smooth"]).onChange(function (e) {
-            switch (e) {
+            switch (e) {//這個球體看起來會比較有用
                 case "flat":
                     // https://github.com/mrdoob/three.js/issues/1929
                     meshMaterial.shading = THREE.FlatShading;
+                    //每個面的顏色都是均勻的，不考慮面上頂點的法向量。這種着色模式適用於具有平坦表面的物體，如方形。
                     break;
                 case "smooth":
                     meshMaterial.shading = THREE.SmoothShading;
+                    /*
+                    在這種模式下，根據頂點的法向量插值計算每個像素的顏色，
+                    從而產生平滑的效果。
+                    這種着色模式適用於曲面物體，如球體。
+                    */
                     break;
             }
 
+            //這樣做是為了確保新的模型使用了更新後的材質，並且保留原先的位置
             var oldPos = sphere.position.clone();
             scene.remove(sphere);
             scene.remove(plane);

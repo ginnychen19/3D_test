@@ -1,0 +1,76 @@
+有分建立2維和3維的模型
+每個可以調的參數不太一樣
+但常見的像是
+物件寬高深、Segments控制線、
+
+這邊的起手式大概就是
+寫了一個createMesh把幾何體傳進去，再給兩個材質，輸出一個mesh
+function createMesh(geom) {
+  var meshMaterial = new THREE.MeshNormalMaterial();
+  meshMaterial.side = THREE.DoubleSide; //雙面映射
+  var wireFrameMat = new THREE.MeshBasicMaterial();
+  wireFrameMat.wireframe = true;
+  // 給兩個材質
+  var plane = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial, wireFrameMat]);
+  return plane;
+}
+當gui有onChange事件後，直接使用controls.redraw
+=====================================================
+【01.平面】2D Plane
+THREE.PlaneGeometry(width, height, widthSegments,heightSegments)
+屬性 ▶
+    width：寬
+    height：高
+    widthSegments：寬切幾條
+    heightSegments：高切幾條
+=====================================================
+【02.二維圓】2D Circle
+THREE.CircleGeometry(radius,segments,thetaStart,thetaLength)
+屬性 ▶
+     radius：圓形的半徑，指定為正數
+   segments：用當前面積看分幾段
+ thetaStart：圓弧的起始角度，以弧度表示
+thetaLength：圓弧的角度範圍，以弧度表示 (默認值為 Math.PI * 2，表示一個完整的圓形)
+=====================================================
+【03.二維環】2D Ring
+THREE.RingGeometry()
+屬性 ▶
+  innerRadius：
+  outerRadius：
+thetaSegments：
+  phiSegments：
+   thetaStart：
+  thetaLength：
+=====================================================
+【04.自定義形狀】2D Shape
+THREE.ShapeGeometry(drawShape())
+
+是基於二維形狀（Shape）創建三維几何體的類別。
+它的建構函式接受以下參數：
+shapes（必需）: 
+    一個或多個 THREE.Shape 物件的數組，表示要根據這些形狀創建幾何體。
+    可以使用 THREE.Shape 的方法，如 moveTo、lineTo、quadraticCurveTo 等，來定義形狀的輪廓。
+curveSegments（可選）: 
+    控制曲線分段的數量，影響曲線的平滑度。默認值為 12。
+holes（可選）: 
+    一個或多個 THREE.Path 物件的數組，表示要添加到主要形狀內部的洞（Hole）的形狀。每個 THREE.Path 表示一個洞的輪廓。
+    通過使用 THREE.ShapeGeometry，您可以根據定義的形狀（Shape）和洞（Hole）創建複雜的几何體，例如多邊形、字母、符號等。
+=====================================================
+【05.方形】3D Cube
+THREE.BoxGeometry(10, 10, 10, 1, 1, 1)
+=====================================================
+【06.球】3D Sphere
+THREE.SphereGeometry(4, 10, 10)
+=====================================================
+【07.多邊柱】3D Cylinder
+THREE.CylinderGeometry(20, 20, 20)
+=====================================================
+【08.環形】3D Torus
+THREE.TorusGeometry(10, 10, 8, 6, Math.PI * 2)
+=====================================================
+【09.扭結】3D Torusknot
+THREE.TorusKnotGeometry(10, 1, 64, 8, 2, 3, 1)
+=====================================================
+【10.三面體】3D Polyhedron
+THREE.IcosahedronGeometry(10, 0)
+=====================================================

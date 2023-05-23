@@ -29,40 +29,30 @@
 
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-        // create a render and set the size
         var renderer;
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
-
         var canvasRenderer = new THREE.CanvasRenderer();
         canvasRenderer.setSize(window.innerWidth, window.innerHeight);
-        renderer = webGLRenderer;
-
+        renderer = webGLRenderer;//設兩個但是用webGL
+        //地板
         var groundGeom = new THREE.PlaneGeometry(100, 100, 4, 4);
         var groundMesh = new THREE.Mesh(groundGeom, new THREE.MeshBasicMaterial({color: 0x555555}));
         groundMesh.rotation.x = -Math.PI / 2;
         groundMesh.position.y = -20;
         scene.add(groundMesh);
-
+        //設好幾個模型
         var sphereGeometry = new THREE.SphereGeometry(14, 20, 20);
         var cubeGeometry = new THREE.BoxGeometry(15, 15, 15);
         var planeGeometry = new THREE.PlaneGeometry(14, 14, 4, 4);
-
-
         var meshMaterial = new THREE.MeshPhongMaterial({color: 0x7777ff});
         var sphere = new THREE.Mesh(sphereGeometry, meshMaterial);
         var cube = new THREE.Mesh(cubeGeometry, meshMaterial);
@@ -72,12 +62,8 @@
         sphere.position.x = 0;
         sphere.position.y = 3;
         sphere.position.z = 2;
-
-
         cube.position = sphere.position;
         plane.position = sphere.position;
-
-
         // add the sphere to the scene
         scene.add(cube);
 
@@ -88,8 +74,8 @@
         camera.lookAt(new THREE.Vector3(10, 0, 0));
 
         // add subtle ambient lighting
-//        var ambientLight = new THREE.AmbientLight(0x0c0c0c);
-//        scene.add(ambientLight);
+        // var ambientLight = new THREE.AmbientLight(0x0c0c0c);
+        // scene.add(ambientLight);
 
         // add spotlight for the shadows
         var spotLight = new THREE.SpotLight(0xffffff);
@@ -193,8 +179,6 @@
                     break;
 
             }
-
-            scene.add(e);
         });
 
         spGui.add(controls, 'metal').onChange(function (e) {
