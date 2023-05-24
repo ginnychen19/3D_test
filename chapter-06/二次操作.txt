@@ -1,0 +1,101 @@
+需要用到弧度的單位
+想用角度時，可以這樣轉換
+var radians = degrees * Math.PI / 180;
+
+=====================================================
+【01.凸包】Convex Hull
+這個要載入套件 ConvexGeometry.js
+THREE.ConvexGeometry(points);
+points可接兩種資訊
+接收點的陣列、一個已經建立的 THREE.Geometry 物件，其中包含一系列點的位置
+
+=====================================================
+【02.旋轉體】Lathe
+像是maya中的revolve功能，基於曲線創建旋轉體。
+THREE.LatheGeometry(points, segments, phiStart, phiLength);
+屬性 ▶
+points：接收點的陣列 or 一個已經建立的 THREE.Geometry 物件
+segments： 要切幾段
+phiStart： 從哪裡開始旋轉，單位是弧度
+phiLength： 旋轉多少，單位是弧度
+=====================================================
+【03.擠出】Extrude
+shape = createMesh(new THREE.ExtrudeGeometry(drawShape(), options));
+這邊是設定擠出自己畫的形狀，並且帶一些參數
+options 包含 ▶
+            amount: 文字的深度或厚度。
+    bevelThickness: 斜角的厚度。
+         bevelSize: 斜角的大小。
+     bevelSegments: 斜角的細分段數。
+      bevelEnabled: 是否啟用斜角。
+     curveSegments: 曲線的細分段數。
+             steps: 創建輪廓的步驟數。
+=====================================================
+【04.擠出管狀幾何體】Extrude TubeGeometry
+用到兩步驟，有線條SplineCurve3之後，在用 TubeGeometry
+new THREE.TubeGeometry(new THREE.SplineCurve3(points), segments, radius, radiusSegments, closed);
+
+TubeGeometry(path, segments, radius, radiusSegments, closed)
+
+options 包含 ▶
+              path: 這邊主要是給一個曲線之類的物件
+    numberOfPoints: 要給幾個控制點 (這些點會隨機生成並產生貝茲曲線)
+          segments: (管身)切成幾段
+            radius: 管子半徑
+    radiusSegments: (圓管面)切成幾段
+            closed: 是否要組成閉環
+             taper: 創建錐形或其他變形的管道
+        taperScale: 使管道朝著終點逐漸變窄或變寬  
+=====================================================
+【05.擠出svg】Extrude svg
+基本上和一般的Extrude處理一樣，差別只有要如何轉換svg的Path
+要加入
+<script type="text/javascript" src="../libs/d3-threeD.js"></script>
+transformSVGPathExposed是這個函式庫的東西
+對svg的處理 ▶
+    01.先取得svg dom元素的path
+    02.用transformSVGPathExposed
+       將 SVG 路徑轉換為 Three.js 中的點座標。
+
+參數可以直接參考03
+=====================================================
+【06.參數化幾何體】Parametric geometries
+像這邊就做了一個波浪型、克萊茵瓶型
+new THREE.ParametricGeometry(func, slices, stacks, optionalConfig)
+
+          func: 一個函式，該函式接受兩個參數 u 和 v，並返回一個 THREE.Vector3 物件，表示該函式計算出的點的座標。
+        slices: 生成幾何體時 u 方向上的分段數量。
+        stacks: 生成幾何體時 v 方向上的分段數量。
+optionalConfig（可選）: 一個物件，包含額外的設定選項。
+    heightScale: 垂直方向上的縮放比例，預設為 1。
+            uMin: u 參數的最小值，預設為 0。
+            uMax: u 參數的最大值，預設為 1。
+            vMin: v 參數的最小值，預設為 0。
+            vMax: v 參數的最大值，預設為 1。
+=====================================================
+【07.文字模型】Text geometries
+new THREE.TextGeometry("Learning", options);
+英文的使用上，這邊有用一些套件
+不過用中文的話要自己額外匯一些設定
+
+text：要顯示的文字內容，可以是字串。
+parameters：一個物件，包含額外的設定選項。
+          font：文字的字型，可以是 Three.js 的 THREE.Font 物件或字型的路徑。
+          size：文字的大小，預設為 100。
+        height：文字的高度，預設為 50。
+ curveSegments：曲線的分段數量，預設為 12。
+  bevelEnabled：是否啟用斜角效果，預設為 false。
+bevelThickness：斜角的厚度，預設為 10。
+     bevelSize：斜角的大小，預設為 8。
+   bevelOffset：斜角的偏移量，預設為 0。
+ bevelSegments：斜角的分段數量，預設為 3。
+=====================================================
+【08.二元操作】Binary operations
+對模型做交集、差集、聯集之類的
+這邊有用到兩個套件01.spin.js  02.ThreeBSP
+spin.js主要是處理完成模型的旋轉
+ThreeBSP的主要操作subtract(差集)、intersect(交集)、union(聯集)
+
+01.先讓物件成為ThreeBSP
+02.這邊是看選了什麼就執行相應的運算
+=====================================================

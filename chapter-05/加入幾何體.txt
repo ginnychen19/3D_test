@@ -44,7 +44,6 @@ thetaSegments：
 =====================================================
 【04.自定義形狀】2D Shape
 THREE.ShapeGeometry(drawShape())
-
 是基於二維形狀（Shape）創建三維几何體的類別。
 它的建構函式接受以下參數：
 shapes（必需）: 

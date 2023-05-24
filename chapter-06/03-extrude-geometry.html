@@ -26,44 +26,27 @@
 
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
-
+        //在這裡先畫出形狀
         var shape = createMesh(new THREE.ShapeGeometry(drawShape()));
-        // add the sphere to the scene
         scene.add(shape);
-
-        // position and point the camera to the center of the scene
+        // position camera
         camera.position.x = -20;
         camera.position.y = 60;
         camera.position.z = 60;
         camera.lookAt(new THREE.Vector3(20, 20, 0));
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
-
-        // call the render function
         var step = 0;
-
-
         // setup the control gui
         var controls = new function () {
-
             this.amount = 2;
             this.bevelThickness = 2;
             this.bevelSize = 0.5;
@@ -72,12 +55,11 @@
             this.bevelEnabled = true;
             this.curveSegments = 12;
             this.steps = 1;
-
+            //02.改變參數時，重新渲染模型模型
             this.asGeom = function () {
                 // remove the old plane
                 scene.remove(shape);
                 // create a new one
-
                 var options = {
                     amount: controls.amount,
                     bevelThickness: controls.bevelThickness,
@@ -87,9 +69,8 @@
                     curveSegments: controls.curveSegments,
                     steps: controls.steps
                 };
-
+                //03.這邊使用Extrude！
                 shape = createMesh(new THREE.ExtrudeGeometry(drawShape(), options));
-                // add it to the scene.
                 scene.add(shape);
             };
 
@@ -103,10 +84,10 @@
         gui.add(controls, 'bevelEnabled').onChange(controls.asGeom);
         gui.add(controls, 'curveSegments', 1, 30).step(1).onChange(controls.asGeom);
         gui.add(controls, 'steps', 1, 5).step(1).onChange(controls.asGeom);
-
+        //03.第一次畫在這！
         controls.asGeom();
         render();
-
+        //畫底圖
         function drawShape() {
 
             // create a basic shape
@@ -151,17 +132,15 @@
         }
 
         function createMesh(geom) {
-
+            //應用矩陣變換//x 軸負方向平移了 -20 個單位
+            //效果看起來很像是移動了圓心
             geom.applyMatrix(new THREE.Matrix4().makeTranslation(-20, 0, 0));
-
             // assign two materials
             var meshMaterial = new THREE.MeshNormalMaterial({
                 shading: THREE.FlatShading,
                 transparent: true,
                 opacity: 0.7
             });
-
-            //  meshMaterial.side = THREE.DoubleSide;
             var wireFrameMat = new THREE.MeshBasicMaterial();
             wireFrameMat.wireframe = true;
 

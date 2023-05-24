@@ -5,7 +5,6 @@
 <head>
     <title>Example 06.01 - Advanced 3D geometries - Convex Hull</title>
     <script type="text/javascript" src="../libs/three.js"></script>
-
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/ConvexGeometry.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
@@ -25,42 +24,29 @@
 <div id="WebGL-output">
 </div>
 
-<!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
-
-        // position and point the camera to the center of the scene
+        // position camera
         camera.position.x = -30;
         camera.position.y = 40;
         camera.position.z = 50;
         camera.lookAt(new THREE.Vector3(10, 0, 0));
-
         // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
 
         // call the render function
         var step = 0;
-
-        // the points group
-        var spGroup;
-        // the mesh
-        var hullMesh;
+        
+        var spGroup;// the points group
+        var hullMesh;// the mesh
 
         generatePoints();
 
@@ -86,6 +72,7 @@
         function generatePoints() {
             // add 10 random spheres
             var points = [];
+            //01.生成了一組隨機的三維點，範圍在-15~15之間
             for (var i = 0; i < 20; i++) {
                 var randomX = -15 + Math.round(Math.random() * 30);
                 var randomY = -15 + Math.round(Math.random() * 30);
@@ -93,22 +80,20 @@
 
                 points.push(new THREE.Vector3(randomX, randomY, randomZ));
             }
-
+            //02.把點面呈可視化圓球
             spGroup = new THREE.Object3D();
             var material = new THREE.MeshBasicMaterial({color: 0xff0000, transparent: false});
             points.forEach(function (point) {
-
                 var spGeom = new THREE.SphereGeometry(0.2);
                 var spMesh = new THREE.Mesh(spGeom, material);
                 spMesh.position.copy(point);
                 spGroup.add(spMesh);
             });
-            // add the points as a group to the scene
             scene.add(spGroup);
 
-            // use the same points to create a convexgeometry
+            // 創建凸包
             var hullGeometry = new THREE.ConvexGeometry(points);
-            hullMesh = createMesh(hullGeometry);
+            hullMesh = createMesh(hullGeometry);//加入材質
             scene.add(hullMesh);
         }
 

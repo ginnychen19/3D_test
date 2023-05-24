@@ -31,42 +31,28 @@
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
-
-        // position and point the camera to the center of the scene
+        // position camera 
         camera.position.x = -30;
         camera.position.y = 40;
         camera.position.z = 50;
         camera.lookAt(new THREE.Vector3(10, 0, 0));
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
 
         // call the render function
         var step = 0;
+    
+        var spGroup;// the points group
+        var latheMesh;// the mesh
+        //01.先預設一個模型
+        generatePoints(15, 2, 2 * Math.PI);
 
-        // the points group
-        var spGroup;
-        // the mesh
-        var latheMesh;
-
-        generatePoints(12, 2, 2 * Math.PI);
-
-        // setup the control gui
         var controls = new function () {
-            // we need the first child, since it's a multimaterial
-
             this.segments = 12;
             this.phiStart = 0;
             this.phiLength = 2 * Math.PI;
@@ -91,24 +77,23 @@
             var points = [];
             var height = 5;
             var count = 30;
+            //使用一個迴圈生成一組隨機的三維點
             for (var i = 0; i < count; i++) {
                 points.push(new THREE.Vector3((Math.sin(i * 0.2) + Math.cos(i * 0.3)) * height + 12, 0, ( i - count ) + count / 2));
             }
-
+            //02.這是給每個生成的點加入可視化的小球
             spGroup = new THREE.Object3D();
             var material = new THREE.MeshBasicMaterial({color: 0xff0000, transparent: false});
             points.forEach(function (point) {
-
                 var spGeom = new THREE.SphereGeometry(0.2);
                 var spMesh = new THREE.Mesh(spGeom, material);
                 spMesh.position.copy(point);
                 spGroup.add(spMesh);
             });
-            // add the points as a group to the scene
             scene.add(spGroup);
 
-            // use the same points to create a LatheGeometry
-            var latheGeometry = new THREE.LatheGeometry(points, segments, phiStart, phiLength);
+            //03.創建旋轉體
+            var latheGeometry = new THREE.LatheGeometry(points, segments, phiStart, phiLength);//segments參數指定了旋轉體的段數
             latheMesh = createMesh(latheGeometry);
 
             scene.add(latheMesh);

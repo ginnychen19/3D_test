@@ -5,7 +5,6 @@
 <head>
     <title>Example 06.05 - Extrude SVG</title>
     <script type="text/javascript" src="../libs/three.js"></script>
-
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <script type="text/javascript" src="../libs/d3-threeD.js"></script>
@@ -44,50 +43,32 @@
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-
-        // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
-
+        //01.畫shape，且加入材質
         var shape = createMesh(new THREE.ShapeGeometry(drawShape()));
-        // add the sphere to the scene
         scene.add(shape);
-
-        // position and point the camera to the center of the scene
+        // position camera 
         camera.position.x = -80;
         camera.position.y = 80;
         camera.position.z = 80;
         camera.lookAt(new THREE.Vector3(60, -60, 0));
-
+        //燈光
         var spotLight = new THREE.DirectionalLight(0xffffff);
         spotLight.position = new THREE.Vector3(70, 170, 70);
         spotLight.intensity = 0.7;
-
         spotLight.target = shape;
-
         scene.add(spotLight);
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
-
+        //02.引入控制器
         orbit = new THREE.OrbitControls(camera, webGLRenderer.domElement);
-
         // call the render function
         var step = 0;
-
-
-        // setup the control gui
         var controls = new function () {
-
             this.amount = 2;
             this.bevelThickness = 2;
             this.bevelSize = 0.5;
@@ -111,9 +92,7 @@
                     curveSegments: controls.curveSegments,
                     steps: controls.steps
                 };
-
                 shape = createMesh(new THREE.ExtrudeGeometry(drawShape(), options));
-                // add it to the scene.
                 scene.add(shape);
             };
 
@@ -132,13 +111,10 @@
         render();
 
         function drawShape() {
-
-
+            //要先取得原圖的path
             var svgString = document.querySelector("#batman-path").getAttribute("d");
-
+            //transformSVGPathExposed是 Three.js 中的一個方法，用於將 SVG 路徑轉換為 Three.js 中的點座標。
             var shape = transformSVGPathExposed(svgString);
-
-            // return the shape
             return shape;
         }
 

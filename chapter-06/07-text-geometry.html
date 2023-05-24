@@ -5,7 +5,6 @@
 <head>
     <title>Example 06.07 - Text geometry</title>
     <script type="text/javascript" src="../libs/three.js"></script>
-
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <script type="text/javascript" src="../assets/fonts/helvetiker_regular.typeface.js"></script>
@@ -30,51 +29,32 @@
 
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0x000000, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
-
-        // position and point the camera to the center of the scene
+        // position camera
         camera.position.x = 100;
         camera.position.y = 300;
         camera.position.z = 600;
         camera.lookAt(new THREE.Vector3(400, 0, -300));
-
+        //燈
         var dirLight = new THREE.DirectionalLight();
         dirLight.position.set(25, 23, 15);
         scene.add(dirLight);
-
-
         var dirLight2 = new THREE.DirectionalLight();
         dirLight2.position.set(-25, 23, 15);
         scene.add(dirLight2);
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
-
-        // call the render function
         var step = 0;
-
-
         var text1;
         var text2;
-
         var controls = new function () {
-
             this.size = 90;
             this.height = 90;
             this.bevelThickness = 2;
@@ -86,7 +66,7 @@
             this.steps = 1;
             this.font = "helvetiker";
             this.weight = "normal";
-//            this.style = "italics";
+            // this.style = "italics";
 
             this.asGeom = function () {
                 // remove the old plane
@@ -138,18 +118,13 @@
 
 
         function createMesh(geom) {
-
-            // assign two materials
-//            var meshMaterial = new THREE.MeshLambertMaterial({color: 0xff5555});
-//            var meshMaterial = new THREE.MeshNormalMaterial();
             var meshMaterial = new THREE.MeshPhongMaterial({
                 specular: 0xffffff,
                 color: 0xeeffff,
                 shininess: 100,
                 metal: true
             });
-//            meshMaterial.side=THREE.DoubleSide;
-            // create a multimaterial
+
             var plane = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial]);
 
             return plane;

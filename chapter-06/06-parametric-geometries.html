@@ -3,9 +3,9 @@
 <html>
 
 <head>
+    <!-- 表示根據一組參數的規則或函數來生成幾何形狀 -->
     <title>Example 06.06 - Parametric geometries</title>
     <script type="text/javascript" src="../libs/three.js"></script>
-
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <style>
@@ -23,57 +23,38 @@
 <!-- Div which will hold the Output -->
 <div id="WebGL-output">
 </div>
-
-<!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
 
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
-
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
-
-        // position and point the camera to the center of the scene
+        // position camera
         camera.position.x = -30;
         camera.position.y = 50;
         camera.position.z = 50;
         camera.lookAt(new THREE.Vector3(10, -20, 0));
-
+        //加入燈光
         var spotLight = new THREE.DirectionalLight();
         spotLight.position = new THREE.Vector3(-20, 250, -50);
         spotLight.target.position.x = 30;
         spotLight.target.position.y = -40;
         spotLight.target.position.z = -20;
         spotLight.intensity = 0.3;
-
         scene.add(spotLight);
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
-
-        // call the render function
         var step = 0;
-
-
         // setup the control gui
         var controls = new function () {
 
         };
-
         var gui = new dat.GUI();
 
-
+        //克萊茵瓶的形狀
         klein = function (u, v) {
             u *= Math.PI;
             v *= 2 * Math.PI;
@@ -92,7 +73,7 @@
 
             return new THREE.Vector3(x, y, z);
         };
-
+        //波浪的形狀
         radialWave = function (u, v) {
             var r = 50;
 
@@ -103,9 +84,8 @@
             return new THREE.Vector3(x, y, z);
         };
 
-        var mesh = createMesh(new THREE.ParametricGeometry(radialWave, 120, 120, false));
+        var mesh = createMesh(new THREE.ParametricGeometry(klein, 120, 120, false));
         scene.add(mesh);
-
         render();
 
 

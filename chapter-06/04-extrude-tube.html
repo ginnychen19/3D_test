@@ -24,47 +24,28 @@
 <div id="WebGL-output">
 </div>
 
-<!-- Javascript code that runs our Three.js examples -->
+
 <script type="text/javascript">
-
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
-
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
-
-        // position and point the camera to the center of the scene
+        // position camera
         camera.position.x = -30;
         camera.position.y = 40;
         camera.position.z = 50;
         camera.lookAt(new THREE.Vector3(10, 0, 0));
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
-
         // call the render function
         var step = 0;
-
-        // the points group
         var spGroup;
-        // the mesh
         var tubeMesh;
-
-
         // setup the control gui
         var controls = new function () {
-
             this.numberOfPoints = 5;
             this.segments = 64;
             this.radius = 1;
@@ -72,14 +53,14 @@
             this.closed = false;
             this.points = [];
             // we need the first child, since it's a multimaterial
-
             this.newPoints = function () {
+                //每次會在隨機增加一個點
                 var points = [];
                 for (var i = 0; i < controls.numberOfPoints; i++) {
+                    //把X、Y、Z都控制在某範圍
                     var randomX = -20 + Math.round(Math.random() * 50);
                     var randomY = -15 + Math.round(Math.random() * 40);
                     var randomZ = -20 + Math.round(Math.random() * 40);
-
                     points.push(new THREE.Vector3(randomX, randomY, randomZ));
                 }
                 controls.points = points;
@@ -89,6 +70,7 @@
             this.redraw = function () {
                 scene.remove(spGroup);
                 scene.remove(tubeMesh);
+                //重新繪製模型
                 generatePoints(controls.points, controls.segments, controls.radius, controls.radiusSegments, controls.closed);
             };
 
@@ -101,57 +83,41 @@
         gui.add(controls, 'radius', 0, 10).onChange(controls.redraw);
         gui.add(controls, 'radiusSegments', 0, 100).step(1).onChange(controls.redraw);
         gui.add(controls, 'closed').onChange(controls.redraw);
-
-
-        controls.newPoints();
-
-
+        
+        controls.newPoints();//這邊是為了第一次先生成15個點
         render();
 
         function generatePoints(points, segments, radius, radiusSegments, closed) {
-            // add n random spheres
-
-
+            // 通常情況下，Object3D 是作為場景（Scene）或群組（Group）的基礎使用
             spGroup = new THREE.Object3D();
+            // 這邊是給點加入可視化的球
             var material = new THREE.MeshBasicMaterial({color: 0xff0000, transparent: false});
             points.forEach(function (point) {
-
                 var spGeom = new THREE.SphereGeometry(0.2);
                 var spMesh = new THREE.Mesh(spGeom, material);
                 spMesh.position.copy(point);
                 spGroup.add(spMesh);
             });
-            // add the points as a group to the scene
             scene.add(spGroup);
 
-            // use the same points to create a convexgeometry
+            //製作出三維樣條曲線（THREE.SplineCurve3）的管狀幾何體（tubeGeometry）
             var tubeGeometry = new THREE.TubeGeometry(new THREE.SplineCurve3(points), segments, radius, radiusSegments, closed);
             tubeMesh = createMesh(tubeGeometry);
             scene.add(tubeMesh);
         }
 
-        function createMesh(geom) {
-
-            // assign two materials
-            //var meshMaterial = new THREE.MeshNormalMaterial();
+        function createMesh(geom) {//上兩個材質
             var meshMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00, transparent: true, opacity: 0.2});
-
             var wireFrameMat = new THREE.MeshBasicMaterial();
             wireFrameMat.wireframe = true;
-
-            // create a multimaterial
             var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial, wireFrameMat]);
-
             return mesh;
         }
 
         function render() {
             stats.update();
-
             spGroup.rotation.y = step;
             tubeMesh.rotation.y = step += 0.01;
-
-            // render using requestAnimationFrame
             requestAnimationFrame(render);
             webGLRenderer.render(scene, camera);
         }
