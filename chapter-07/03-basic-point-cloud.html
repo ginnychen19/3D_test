@@ -5,7 +5,6 @@
 <head>
     <title>Example 07.03 - Particle Basic Material</title>
     <script type="text/javascript" src="../libs/three.js"></script>
-
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <style>
@@ -27,33 +26,21 @@
 
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0x000000, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
-
-        // position and point the camera to the center of the scene
+        // position camera
         camera.position.x = 20;
         camera.position.y = 0;
         camera.position.z = 150;
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
-
+        //01.加入雲
         var cloud;
-
         var controls = new function () {
             this.size = 4;
             this.transparent = true;
@@ -84,28 +71,27 @@
         render();
 
         function createParticles(size, transparent, opacity, vertexColors, sizeAttenuation, color) {
-
-
             var geom = new THREE.Geometry();
             var material = new THREE.PointCloudMaterial({
                 size: size,
                 transparent: transparent,
                 opacity: opacity,
                 vertexColors: vertexColors,
-
                 sizeAttenuation: sizeAttenuation,
                 color: color
             });
-
-
             var range = 500;
             for (var i = 0; i < 15000; i++) {
+                //隨機位置給點
                 var particle = new THREE.Vector3(Math.random() * range - range / 2, Math.random() * range - range / 2, Math.random() * range - range / 2);
                 geom.vertices.push(particle);
+                //給點顏色，這裡可以體現出這點
+                /*将​​vertexColors​​​属性设置为​​true​​​，并且通过颜色属性指定了几何体的颜色，
+                那么将覆盖该属性（更准确地说，顶点的颜色将乘以此值以确定最终颜色）。默认值为​​0xffffff​​。*/
                 var color = new THREE.Color(0x00ff00);
+                //因為只有綠色有隨機，所以會有深淺的差別，但是關了點著色也就沒這效果了
                 color.setHSL(color.getHSL().h, color.getHSL().s, Math.random() * color.getHSL().l);
                 geom.colors.push(color);
-
             }
 
             cloud = new THREE.PointCloud(geom, material);

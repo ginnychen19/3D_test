@@ -28,39 +28,29 @@
 
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0x000000, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
-
-        // position and point the camera to the center of the scene
+        // position camera
         camera.position.x = 20;
         camera.position.y = 0;
         camera.position.z = 150;
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
-
-
+        //01.建立精靈圖
         createSprites();
         render();
 
+        /* 這邊是把所有精靈圖變成群組，效能會有所提升。 
+            如果你需要對整個粒子系統進行操作，如旋轉、縮放或移動，
+            直接對群組進行操作會更高效，不需要逐個處理每個精靈圖。
+        */
         var group;
-
         function createSprites() {
-
             group = new THREE.Object3D();
             var range = 200;
             for (var i = 0; i < 400; i++) {
@@ -68,17 +58,12 @@
             }
             scene.add(group);
         }
-
-
         function getTexture() {
             var texture = new THREE.ImageUtils.loadTexture("../assets/textures/particles/sprite-sheet.png");
             return texture;
         }
-
-
         function createSprite(size, transparent, opacity, color, spriteNumber, range) {
-
-
+            // //這裡用的不是點雲ㄝ
             var spriteMaterial = new THREE.SpriteMaterial({
                         opacity: opacity,
                         color: color,
@@ -87,19 +72,17 @@
                     }
             );
 
-            // we have 1 row, with five sprites
+            // 切精靈圖
             spriteMaterial.map.offset = new THREE.Vector2(0.2 * spriteNumber, 0);
             spriteMaterial.map.repeat = new THREE.Vector2(1 / 5, 1);
             spriteMaterial.depthTest = false;
-
             spriteMaterial.blending = THREE.AdditiveBlending;
-
+            //用的是.Sprite
             var sprite = new THREE.Sprite(spriteMaterial);
             sprite.scale.set(size, size, size);
             sprite.position.set(Math.random() * range - range / 2, Math.random() * range - range / 2, Math.random() * range - range / 2);
             sprite.velocityX = 5;
-
-
+            
             return sprite;
         }
 

@@ -30,35 +30,21 @@
 
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
-
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
+        //01.這裡就用的是canvas渲染
         var canvasRenderer = new THREE.CanvasRenderer();
-//        var canvasRenderer = new THREE.WebGLRenderer();
-
         canvasRenderer.setClearColor(new THREE.Color(0x000000, 1.0));
         canvasRenderer.setSize(window.innerWidth, window.innerHeight);
-
-        // position and point the camera to the center of the scene
+        // position camera
         camera.position.x = 20;
         camera.position.y = 0;
         camera.position.z = 150;
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(canvasRenderer.domElement);
-
+        //02.畫2D
         var getTexture = function (ctx) {
-
             // the body
             ctx.translate(-81, -84);
 
@@ -100,10 +86,8 @@
             ctx.beginPath();
             ctx.arc(89, 102, 2, 0, Math.PI * 2, true);
             ctx.fill();
-
         };
-
-
+        //03.建立精靈圖
         createSprites();
         render();
 

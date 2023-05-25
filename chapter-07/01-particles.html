@@ -13,7 +13,7 @@
             /* set margin to 0 and overflow to hidden, to go fullscreen */
             margin: 0;
             overflow: hidden;
-            background-color: #000000;
+            background-color: #2e5029;
         }
     </style>
 </head>
@@ -24,43 +24,27 @@
 <!-- Div which will hold the Output -->
 <div id="WebGL-output">
 </div>
-
-<!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
-//        var canvasRenderer = new THREE.CanvasRenderer();
+        //01.這邊也是用WebGL渲染
         var canvasRenderer = new THREE.WebGLRenderer();
         canvasRenderer.setClearColor(new THREE.Color(0x000000, 1.0));
         canvasRenderer.setSize(window.innerWidth, window.innerHeight);
-
-        // position and point the camera to the center of the scene
+        // position camera
         camera.position.x = 0;
         camera.position.y = 0;
         camera.position.z = 150;
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(canvasRenderer.domElement);
-
-
+        //02.在這裡建立粒子們
         createSprites();
         render();
 
         function createSprites() {
             var material = new THREE.SpriteMaterial();
-
-
             for (var x = -5; x < 5; x++) {
                 for (var y = -5; y < 5; y++) {
                     var sprite = new THREE.Sprite(material);

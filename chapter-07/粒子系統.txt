@@ -1,0 +1,123 @@
+粒子的可用材質大概有這些
+01.ImageUtils.loadTexture("路徑");
+   但不再推薦使用，並且在最新版本的Three.js（r128及更高版本）中已經被移除。
+02.TextureLoader
+   它是Three.js中負責處理圖像紋理載入的建議方式。
+   可以使用load()方法載入圖像
+    var loader = new THREE.TextureLoader();
+    loader.load('path/to/texture.jpg', function(texture) {
+        // 在這裡處理載入完成後的紋理
+    });
+03.CubeTextureLoader
+   載入立方體貼圖（CubeMap）的類別。
+   它可以載入六個面的圖像，用於創建環境貼圖等效果
+    var loader = new THREE.CubeTextureLoader();
+    loader.setPath('path/to/textures/');
+
+    var textureCube = loader.load([
+        'px.jpg', 'nx.jpg',
+        'py.jpg', 'ny.jpg',
+        'pz.jpg', 'nz.jpg'
+    ]);
+    // 使用 textureCube 進行後續操作
+=====================================================
+【01.粒子起手式】Sprite
+THREE.Sprite(material);
+material會是THREE.SpriteMaterial();
+
+SpriteMaterial 會接這些資料 ▶
+          color：精灵的颜色，默认为白色（0xffffff）。
+            map：精灵的贴图，可以是 Texture 对象。
+       rotation：精灵的旋转角度，以弧度为单位，默认为 0。
+sizeAttenuation：是否开启大小衰减，远离相机时会变小。
+           size：精灵的大小，默认为 1。可以设置为小于 1 的值来缩小精灵的尺寸。
+            fog：是否考虑雾效，默认为 false。设置为 true 时，精灵会受到场景中的雾效影响。
+=====================================================
+【02.多粒子管理 => 點雲】PointCloud
+用這個的好處是，當我們要建立大量的點時這樣比較省效能
+THREE.PointCloud(geom, material);
+    geom => 傳一堆THREE.Vector3點位置
+material => 用 PointCloudMaterial
+
+PointCloudMaterial可以接收 ▶
+         color: 将​​vertexColors​​​属性设置为​​true​​​，并且通过颜色属性指定了几何体的颜色，
+                那么将覆盖该属性（更准确地说，顶点的颜色将乘以此值以确定最终颜色）。默认值为​​0xffffff​​。
+           map: 通过这个属性可以在粒子上应该某种材质。
+          size: 该属性指定粒子的大小。默认值为1。
+sizeAnnutation: 是否开启大小衰减，远离相机时会变小。
+  vertexColors: 如果该属性设置为​true​​​，并且几何体的颜色数组也有值，
+                那就会使用颜色数组中的值。默认值为​​THREE.NoColors​​
+       opacity: 与​​transparent​​属性一起使用，用来设置粒子的不透明度。默认值为1（完全不透明）
+   transparent: 如果该属性设置为​​true​​​，那么粒子在渲染是会根据​​opacity​​​属性的值来确定其透明度。默认值为​​false​​
+      blending: 该属性指定渲染粒子时的融合模式。
+           fog: 该属性决定粒子是否受场景中的雾化效果影响。默认值为​​true​​
+-----------------------------------------------------
+【03.點雲的參數】基本上就是上面屬性的實作
+=====================================================
+【04.引入自定義貼圖】
+01.有多引入套件Projector(自 Three.js 版本 r71 起已被棄用)
+是 Three.js 中的一个旧版本插件，用于在 WebGL 上进行 2D 渲染。
+它提供了一些功能，使开发者能够在 Three.js 中创建和渲染 2D 元素，例如文字、精灵和 HUD（平面界面）。
+
+SpriteCanvasMaterial({program: getTexture,color: 0xffffff})
+getTexture的部分就是用涵式，直接用畫布畫的。
+-----------------------------------------------------
+【05.自定義貼圖動起來】這才是常用作法 
+差別就在，我們是建立canvas畫在上面，再用THREE.Texture(canvas);變成貼圖
+然後在SpriteMaterial裡，用map屬性去接
+THREE.SpriteMaterial({
+    map: getTexture(),
+    color: 0xffffff
+});
+
+值得一提的是這裡有用到.PointCloudMaterial 
+当粒子的位置、大小和颜色都不发生变化时
+可以将 .sortParticles 设置为 true，以提高渲染性能。
+这将禁用对粒子进行排序的过程，从而节省计算资源。
+-----------------------------------------------------
+【06.下雨】
+01.載入貼圖
+02.增加材質 ParticleBasicMaterial
+
+ParticleBasicMaterial有這些屬性
+color、map、size、sizeAttenuation、vertexColors
+blending：混合模式，控制粒子与背景的混合方式，默认为 NormalBlending。
+transparent：是否启用透明，默认为 false。
+opacity：粒子的不透明度，范围为 0（完全透明）到 1（完全不透明）。
+depthTest：是否启用深度测试，默认为 true。
+depthWrite：是否允许粒子对深度缓冲区进行写入，默认为 true。
+-----------------------------------------------------
+【07.下雪】
+這邊可以看一下，如果粒子是多個貼圖的處理方式
+=====================================================
+【08.使用精靈圖】
+01.這邊設立兩個sence和camera來渲染不同場景
+   最後讓webGLRenderer渲染多個場景
+      webGLRenderer.render(scene, camera);
+      webGLRenderer.autoClear = false;//這個確保前畫面不會不見
+      webGLRenderer.render(sceneOrtho, cameraOrtho);
+02.另外，在three.js中的精靈圖是這樣切位置的
+      //.Vector2 的 x 和 y 值可以用來控制紋理的偏移、重複、縮放等。
+      //在這些情況下，.Vector2 的值通常被視為介於 0 到 1 之間的比例值
+      spriteMaterial.map.offset = new THREE.Vector2(0.2 * spriteNumber, 0);
+      spriteMaterial.map.repeat = new THREE.Vector2(1 / 5, 1);
+      spriteMaterial.depthTest = false;
+      spriteMaterial.blending = THREE.AdditiveBlending;
+-----------------------------------------------------
+【09.精靈圖動起來】
+注意！如果粒子系統是用精靈圖，是不能用點雲畫的。
+    ● 點雲（PointCloud）是基於點的渲染技術，
+      每個點都有自己的位置、顏色和大小。
+    ● 而精靈圖（Sprite）則是基於平面圖片的渲染技術，
+      每個精靈圖都有自己的位置、大小和材質（通常是圖片）。
+但是這邊最後是把所有精靈圖變成群組，效能也是會有所提升。
+=====================================================
+【10.模型轉粒子】
+這邊主要是做knot = createPointCloud(geom)
+或knot = createMesh(geom);的切換
+
+在做粒子的部分，這裡的粒子是用canvas畫的。
+要記得在畫的部分打開texture.needsUpdate = true;
+                //因為原則上requestAnimationFrame(render);在跑時
+                //貼圖屬性有改變不會主動偵測，所以要這樣寫
+=====================================================

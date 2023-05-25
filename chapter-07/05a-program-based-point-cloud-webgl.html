@@ -5,7 +5,6 @@
 <head>
     <title>Example 07.05 - Particles - Canvas based texture - WebGL</title>
     <script type="text/javascript" src="../libs/three.js"></script>
-
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <style>
@@ -32,26 +31,18 @@
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
+        // create a render 
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0x000000, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
-
-        // position and point the camera to the center of the scene
+        // position camera
         camera.position.x = 20;
         camera.position.y = 0;
         camera.position.z = 150;
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
-
+        //01.畫貼圖
         var getTexture = function () {
             var canvas = document.createElement('canvas');
             canvas.width = 32;
@@ -140,10 +131,7 @@
 
 
         function createPointCloud(size, transparent, opacity, sizeAttenuation, color) {
-
             var geom = new THREE.Geometry();
-
-
             var material = new THREE.PointCloudMaterial({
                 size: size,
                 transparent: transparent,

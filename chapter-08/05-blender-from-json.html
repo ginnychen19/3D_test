@@ -3,7 +3,7 @@
 <html>
 
 <head>
-    <title>Example 05.08 - Basic 3D geometries - Torusknot</title>
+    <title>Example 08.05 - Load blender model </title>
     <script type="text/javascript" src="../libs/three.js"></script>
 
     <script type="text/javascript" src="../libs/stats.js"></script>
@@ -44,67 +44,59 @@
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
 
-        var knot = createMesh(new THREE.TorusKnotGeometry(10, 1, 64, 8, 2, 3, 1));
-        scene.add(knot);
-
-        // position camera
+        // position and point the camera to the center of the scene
         camera.position.x = -30;
         camera.position.y = 40;
         camera.position.z = 50;
-        camera.lookAt(new THREE.Vector3(10, 0, 0));
+        camera.lookAt(new THREE.Vector3(0, 10, 0));
+
+
+        // add spotlight for the shadows
+        var spotLight = new THREE.SpotLight(0xffffff);
+        spotLight.position.set(0, 50, 30);
+        spotLight.intensity = 2;
+        scene.add(spotLight);
+
+        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
-        
+
+        // call the render function
         var step = 0;
+
+
         // setup the control gui
         var controls = new function () {
             // we need the first child, since it's a multimaterial
-            this.radius = knot.children[0].geometry.parameters.radius;
-            this.tube = 0.3;
-            this.radialSegments = knot.children[0].geometry.parameters.radialSegments;
-            this.tubularSegments = knot.children[0].geometry.parameters.tubularSegments;
-            this.p = knot.children[0].geometry.parameters.p;
-            this.q = knot.children[0].geometry.parameters.q;
-            this.heightScale = knot.children[0].geometry.parameters.heightScale;
 
-            this.redraw = function () {
-                // remove the old plane
-                scene.remove(knot);
-                // create a new one
 
-                knot = createMesh(new THREE.TorusKnotGeometry(controls.radius, controls.tube, Math.round(controls.radialSegments), Math.round(controls.tubularSegments), Math.round(controls.p), Math.round(controls.q), controls.heightScale));
-                // add it to the scene.
-                scene.add(knot);
-            };
         };
 
         var gui = new dat.GUI();
-        gui.add(controls, 'radius', 0, 40).onChange(controls.redraw);
-        gui.add(controls, 'tube', 0, 40).onChange(controls.redraw);
-        gui.add(controls, 'radialSegments', 0, 400).step(1).onChange(controls.redraw);
-        gui.add(controls, 'tubularSegments', 1, 20).step(1).onChange(controls.redraw);
-        gui.add(controls, 'p', 1, 10).step(1).onChange(controls.redraw);
-        gui.add(controls, 'q', 1, 15).step(1).onChange(controls.redraw);
-        gui.add(controls, 'heightScale', 0, 5).onChange(controls.redraw);
+        var mesh;
+
+        var loader = new THREE.JSONLoader();
+        loader.load('../assets/models/misc_chair01.js', function (geometry, mat) {
+            mesh = new THREE.Mesh(geometry, mat[0]);
+
+            mesh.scale.x = 15;
+            mesh.scale.y = 15;
+            mesh.scale.z = 15;
+
+            scene.add(mesh);
+
+        }, '../assets/models/');
 
 
         render();
 
-        function createMesh(geom) {
-
-            // assign two materials
-            var meshMaterial = new THREE.MeshNormalMaterial({});
-            meshMaterial.side = THREE.DoubleSide;
-
-            // create a multimaterial
-            var mesh = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial]);
-
-            return mesh;
-        }
 
         function render() {
             stats.update();
 
-            knot.rotation.y = step += 0.01;
+            if (mesh) {
+                mesh.rotation.y += 0.02;
+            }
+
 
             // render using requestAnimationFrame
             requestAnimationFrame(render);

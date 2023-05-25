@@ -5,7 +5,6 @@
 <head>
     <title>Example 07.04 - Particles - Canvas based texture</title>
     <script type="text/javascript" src="../libs/three.js"></script>
-
     <script type="text/javascript" src="../libs/stats.js"></script>
     <script type="text/javascript" src="../libs/dat.gui.js"></script>
     <style>
@@ -28,38 +27,25 @@
 
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
+        // 01.這邊用WebGLRenderer
         var canvasRenderer = new THREE.WebGLRenderer();
-
         canvasRenderer.setClearColor(new THREE.Color(0x000000, 1.0));
         canvasRenderer.setSize(window.innerWidth, window.innerHeight);
-
-        // position and point the camera to the center of the scene
+        // position camera
         camera.position.x = 20;
         camera.position.y = 0;
         camera.position.z = 150;
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(canvasRenderer.domElement);
-
+        //差別是畫在canvas上再取得canvas上的圖案
         var getTexture = function () {
-
             var canvas = document.createElement('canvas');
             canvas.width = 32;
             canvas.height = 32;
-
             var ctx = canvas.getContext('2d');
             // the body
             ctx.translate(-81, -84);
@@ -78,7 +64,6 @@
             ctx.lineTo(87.666, 111.333);
             ctx.lineTo(83, 116);
             ctx.fill();
-
             // the eyes
             ctx.fillStyle = "white";
             ctx.beginPath();
@@ -93,7 +78,6 @@
             ctx.bezierCurveTo(106, 106, 107, 103, 107, 101);
             ctx.bezierCurveTo(107, 99, 106, 96, 103, 96);
             ctx.fill();
-
             // the pupils
             ctx.fillStyle = "blue";
             ctx.beginPath();
@@ -102,18 +86,15 @@
             ctx.beginPath();
             ctx.arc(89, 102, 2, 0, Math.PI * 2, true);
             ctx.fill();
-
-
+            //用.Texture方法去取得
             var texture = new THREE.Texture(canvas);
             texture.needsUpdate = true;
-            return texture;
-
+            return texture;//會把貼圖回傳出去
         };
 
         createSprites();
         render();
-
-
+        
         function createSprites() {
             var material = new THREE.SpriteMaterial({
                 map: getTexture(),

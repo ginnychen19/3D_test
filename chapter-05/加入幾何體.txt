@@ -69,6 +69,13 @@ THREE.TorusGeometry(10, 10, 8, 6, Math.PI * 2)
 =====================================================
 【09.扭結】3D Torusknot
 THREE.TorusKnotGeometry(10, 1, 64, 8, 2, 3, 1)
+         radius: 管子間的距離
+           tube: 管子的粗細
+ radialSegments: 徑向分段數
+tubularSegments: 管狀分段數
+              p: 控制環狀結的迴圈數，影響環狀結的形狀。
+              q: 控制管狀結的迴圈數，影響管狀結的形狀。
+    heightScale: 控制環狀結高度的縮放因子。
 =====================================================
 【10.三面體】3D Polyhedron
 THREE.IcosahedronGeometry(10, 0)

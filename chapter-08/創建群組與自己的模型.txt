@@ -1,0 +1,17 @@
+【大綱】
+01-grouping ▶ 群組的位移特性
+02-merging ▶ 群組的效能比較
+03-load-save-json-object ▶ 儲存物件
+04-load-save-json-scene ▶導出、導入、清空場景
+05-blender-from-json ▶引入 GLTF模型
+06-load-obj ▶ 引入OBJ模型
+07-load-obj-mtl ▶ 引入有材質的OBJ模型
+08-load-collada ▶ 引入有材質、燈光的collada模型
+09-load-stl ▶ 從這裡開始都大同小異，回來翻書 p.174
+10-load-ctm ▶
+11-load-vtk ▶
+12-load-pdb ▶
+13-load-PLY ▶ 這邊示範是建粒子模型的風格
+14-load-awd ▶
+15-load-assimp ▶
+17-load-babylon ▶ 這也是包含光源的
