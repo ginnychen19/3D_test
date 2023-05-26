@@ -26,48 +26,30 @@
 
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
-
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
-
+        // 建立模型
         var knot = createMesh(new THREE.TorusKnotGeometry(10, 1, 64, 8, 2, 3, 1));
-        // add the sphere to the scene
         scene.add(knot);
 
-        // position and point the camera to the center of the scene
+        // position camera
         camera.position.x = -30;
         camera.position.y = 40;
         camera.position.z = 50;
         camera.lookAt(new THREE.Vector3(-20, 0, 0));
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
-
-        // call the render function
+        
         var step = 0;
-
-
         var loadedMesh;
-
         // setup the control gui
         var controls = new function () {
-
-            console.log(knot.geometry.parameters);
-            // we need the first child, since it's a multimaterial
             this.radius = knot.geometry.parameters.radius;
             this.tube = 0.3;
             this.radialSegments = knot.geometry.parameters.radialSegments;
@@ -77,23 +59,18 @@
             this.heightScale = knot.geometry.parameters.heightScale;
 
             this.redraw = function () {
-                // remove the old plane
                 scene.remove(knot);
-                // create a new one
                 knot = createMesh(new THREE.TorusKnotGeometry(controls.radius, controls.tube, Math.round(controls.radialSegments), Math.round(controls.tubularSegments), Math.round(controls.p), Math.round(controls.q), controls.heightScale));
-                // add it to the scene.
                 scene.add(knot);
             };
-
+            //儲存和載入
             this.save = function () {
-                var result = knot.toJSON();
+                var result = knot.toJSON(); //只有內建模型能用
                 localStorage.setItem("json", JSON.stringify(result));
             };
 
             this.load = function () {
-
                 scene.remove(loadedMesh);
-
                 var json = localStorage.getItem("json");
 
                 if (json) {

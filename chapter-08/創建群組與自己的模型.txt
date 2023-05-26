@@ -2,7 +2,8 @@
 01-grouping ▶ 群組的位移特性
 02-merging ▶ 群組的效能比較
 03-load-save-json-object ▶ 儲存物件
-04-load-save-json-scene ▶導出、導入、清空場景
+04-load-save-json-scene ▶ 導出、導入、清空場景
+
 05-blender-from-json ▶引入 GLTF模型
 06-load-obj ▶ 引入OBJ模型
 07-load-obj-mtl ▶ 引入有材質的OBJ模型
@@ -10,8 +11,66 @@
 09-load-stl ▶ 從這裡開始都大同小異，回來翻書 p.174
 10-load-ctm ▶
 11-load-vtk ▶
-12-load-pdb ▶
-13-load-PLY ▶ 這邊示範是建粒子模型的風格
+12-load-pdb ▶ 這邊會特別一點，在頂點建立球之後，透過算法建立鍵。
+13-load-PLY ▶ 這邊示範建粒子模型的風格
 14-load-awd ▶
 15-load-assimp ▶
 17-load-babylon ▶ 這也是包含光源的
+============================================================
+【01.群組的位移特性】
+這段程式碼實現了以下功能：
+
+建立了一個名為 group 的 THREE.Group 物件，該物件用於包含兩個子物件 sphere 和 cube。
+當未勾選 "grouping" 時，兩個子物件 sphere 和 cube 會各自獨立地旋轉。
+當勾選了 "grouping" 時，兩個子物件 sphere 和 cube 會根據 group 物件的中心點進行旋轉。
+具體實現細節如下：
+
+初始化時，創建了 sphere 和 cube 兩個物件，並設置它們的初始位置。
+創建了一個 group 物件，並將 sphere 和 cube 添加到 group 中。
+當勾選了 "grouping" 時，group 的位置可以進行控制，而 sphere 和 cube 的位置則相對於 group 的位置進行設置，這樣就實現了兩個物件根據 group 的中心點進行旋轉。
+當未勾選 "grouping" 時，group 的位置設置不起作用，sphere 和 cube 分別根據自己的位置進行獨立旋轉。
+總結來說，勾選 "grouping" 時，group 物件的位置控制了兩個子物件的中心點，使它們圍繞 group 的中心點進行旋轉；未勾選 "grouping" 時，group 的位置不起作用，兩個子物件獨立地根據各自的位置進行旋轉。這樣就實現了在有勾和無勾 "grouping" 時不同的旋轉行為。
+============================================================
+【02.群組的效能比較】
+這邊是在redraw決定合併與否，如何將物件加入到場景，有合併的話，
+在迴圈跑完數量後，用到.merge指令，何必成一個後加入。
+然後更新頂點很重要，千萬別忘了cubeMesh.updateMatrix();
+01.updateMatrix() 方法會根據物體的當前位置、旋轉和縮放屬性，
+                  計算並更新物體的變換矩陣。這樣做可以確保在
+                  後續的渲染過程中，物體的位置、旋轉和縮放的
+                  變化能夠正確應用到物體的頂點位置上。
+
+02.merge(geometry, matrix, materialIndexOffset)
+        geometry: 要合併的幾何體。
+        matrix (可選): 可以將合併的幾何體應用於變換矩陣。
+        materialIndexOffset (可選): 用於調整合併幾何體的材質索引。預設值為0。
+
+針對模型的合併還可以有這些
+.mergeMesh(mesh): 用於合併網格。它接受一個參數：
+        mesh: 要合併的網格物件。
+.mergeVertices(): 用於合併頂點。它將合併重複的頂點，從而減少幾何體的頂點數量。
+============================================================
+【03.儲存物件】
+他是用 幾何體.toJSON() 去存的，但我覺得這什麼用
+只能存 JSON3D 或 GLTF/GLB 格式 ~
+============================================================
+【04.導出、導入、清空場景】
+這個要引入套件
+<script type="text/javascript" src="../libs/SceneLoader.js"></script>
+<script type="text/javascript" src="../libs/SceneExporter.js"></script>
+
+但一樣，他們都需要用json檔，所以我覺得不好用
+============================================================
+【05.引入自製模型】
+✦ 05-1.引入 GLTF模型
+    <script type="text/javascript" src="../libs/OBJLoader.js"></script>
+*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+✦ 05-2.引入有材質的OBJ模型
+引入套件
+    <script type="text/javascript" src="../libs/OBJLoader.js"></script>
+    <script type="text/javascript" src="../libs/MTLLoader.js"></script>
+    <script type="text/javascript" src="../libs/OBJMTLLoader.js"></script>
+*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+✦ 05-3.引入有材質、燈光的collada模型
+*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-
+✦ 05-4.其他模型格式

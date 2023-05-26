@@ -27,33 +27,22 @@
 <!-- Javascript code that runs our Three.js examples -->
 <script type="text/javascript">
 
-    // once everything is loaded, we run our Three.js stuff.
     function init() {
 
         var stats = initStats();
-
-        // create a scene, that will hold all our elements such as objects, cameras and lights.
         var scene = new THREE.Scene();
-
-        // create a camera, which defines where we're looking at.
         var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-        // create a render and set the size
         var webGLRenderer = new THREE.WebGLRenderer();
         webGLRenderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
         webGLRenderer.setSize(window.innerWidth, window.innerHeight);
         webGLRenderer.shadowMapEnabled = true;
-
-        // add the sphere to the scene
-
-        // position and point the camera to the center of the scene
+        // position camera 
         camera.position.x = 30;
         camera.position.y = 30;
         camera.position.z = 30;
         camera.lookAt(new THREE.Vector3(0, 0, 0));
-
+        //模型放置
         var ground = new THREE.PlaneGeometry(100, 100, 50, 50);
-
         var groundMesh = THREE.SceneUtils.createMultiMaterialObject(ground,
                 [new THREE.MeshBasicMaterial({wireframe: true, overdraw: true, color: 000000}),
                     new THREE.MeshBasicMaterial({color: 0x00ff00, transparent: true, opacity: 0.5}
@@ -62,18 +51,14 @@
         groundMesh.rotation.x = -0.5 * Math.PI;
         scene.add(groundMesh);
 
-
-        // add the output of the renderer to the html element
         document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
 
         // call the render function
         var step = 0.03;
-
         var sphere;
         var cube;
-        var group;
-        var bboxMesh;
-
+        var group; //group（群組對象）
+        var bboxMesh; //bboxMesh（包圍框對象）
         // setup the control gui
         var controls = new function () {
             // we need the first child, since it's a multimaterial
@@ -98,40 +83,33 @@
 
 
             this.redraw = function () {
-                // remove the old plane
-                //scene.remove(sphere);
-                //scene.remove(cube);
+                // 01.把舊群組移除
                 scene.remove(group);
-
-                // create a new one
+                // 02.先建立好模型物件。
                 sphere = createMesh(new THREE.SphereGeometry(5, 10, 10));
                 cube = createMesh(new THREE.BoxGeometry(6, 6, 6));
-
                 sphere.position.set(controls.spherePosX, controls.spherePosY, controls.spherePosZ);
                 cube.position.set(controls.cubePosX, controls.cubePosY, controls.cubePosZ);
-                // add it to the scene.
-
-                // also create a group, only used for rotating
+                //03. 創造群組物件
                 group = new THREE.Group();
                 group.add(sphere);
                 group.add(cube);
-
-                scene.add(group);
-                controls.positionBoundingBox();
-
+                scene.add(group); //加入group群組到世界
+                controls.positionBoundingBox();//看下
+                //使用了群組（group）的位置作為箭頭的位置
                 var arrow = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), group.position, 10, 0x0000ff);
                 scene.add(arrow);
-
-
             };
-
+            // 當有值改變時都會用到
             this.positionBoundingBox = function () {
                 scene.remove(bboxMesh);
+                //會透過這行去計算目前的包圍框
                 var box = setFromObject(group);
+                //取得包圍框的長寬深。
                 var width = box.max.x - box.min.x;
                 var height = box.max.y - box.min.y;
                 var depth = box.max.z - box.min.z;
-
+                //用包圍框創建一個bbox
                 var bbox = new THREE.BoxGeometry(width, height, depth);
                 bboxMesh = new THREE.Mesh(bbox, new THREE.MeshBasicMaterial({
                     color: 0x000000,
@@ -139,8 +117,7 @@
                     wireframeLinewidth: 2,
                     wireframe: true
                 }));
-//            scene.add(bboxMesh);
-
+                //這邊是在取包圍框的中心點放入bboxMesh.position
                 bboxMesh.position.x = ((box.min.x + box.max.x) / 2);
                 bboxMesh.position.y = ((box.min.y + box.max.y) / 2);
                 bboxMesh.position.z = ((box.min.z + box.max.z) / 2);
@@ -206,15 +183,14 @@
         gui.add(controls, "rotate");
         controls.redraw();
         render();
-
+        
+        //給材質
         function createMesh(geom) {
-
             // assign two materials
             var meshMaterial = new THREE.MeshNormalMaterial();
             meshMaterial.side = THREE.DoubleSide;
             var wireFrameMat = new THREE.MeshBasicMaterial();
             wireFrameMat.wireframe = true;
-
             // create a multimaterial
             var plane = THREE.SceneUtils.createMultiMaterialObject(geom, [meshMaterial, wireFrameMat]);
 
@@ -223,19 +199,15 @@
 
         function render() {
             stats.update();
-
-
+            //他是不管如何都會一直去算場景座標，但有勾群組就會給單個或群組賦予旋轉！！
             if (controls.grouping && controls.rotate) {
                 group.rotation.y += step;
             }
-
             if (controls.rotate && !controls.grouping) {
                 sphere.rotation.y += step;
                 cube.rotation.y += step;
             }
 
-//        controls.positionBoundingBox();
-            // render using requestAnimationFrame
             requestAnimationFrame(render);
             webGLRenderer.render(scene, camera);
         }
@@ -257,18 +229,35 @@
 
 
         // http://jsfiddle.net/MREL4/
+        //這是在生成一個包圍框，如果有勾要群組的話
+        /* 
+        該函數通過遍歷物體的所有節點，找到包含頂點的幾何體，
+        並根據節點的世界變換矩陣將頂點轉換到世界坐標系 
+        */
         function setFromObject(object) {
+            //這邊的object是取得group
             var box = new THREE.Box3();
-            var v1 = new THREE.Vector3();
-            object.updateMatrixWorld(true);
-            box.makeEmpty();
+            var v1 = new THREE.Vector3(); //用於臨時儲存頂點
+            object.updateMatrixWorld(true); 
+            /* 確保物件在進行繪製或渲染時具有正確的世界位置。
+               它在遍歷物件的父級層次結構時應用矩陣變換，
+               以便將物件的本地坐標轉換為世界坐標。*/
+            box.makeEmpty(); //必須確保包圍框是空的，以便能夠正確地計算
+            
             object.traverse(function (node) {
+                //這邊加入判斷是為避免對沒有形狀或頂點的物件產生錯誤。
                 if (node.geometry !== undefined && node.geometry.vertices !== undefined) {
                     var vertices = node.geometry.vertices;
                     for (var i = 0, il = vertices.length; i < il; i++) {
-                        v1.copy(vertices[i]);
+                        v1.copy(vertices[i]); // 將頂點的座標複製到 v1 向量中
                         v1.applyMatrix4(node.matrixWorld);
+                        /*
+                        總結來說，將頂點座標應用物件的世界變換矩陣是為了將頂點的座標從物件本地座標系轉換到全局座標系中，
+                        以確保在計算包圍框時考慮到物件的實際位置和旋轉變換。
+                        這樣才能得到正確的包圍框範圍，從而在場景中準確地渲染物件。
+                        */
                         box.expandByPoint(v1);
+                        //box.expandByPoint(v1) 的作用是將頂點的座標納入包圍框的計算，以擴展包圍框的範圍，使其能夠包含物件的所有頂點。
                     }
                 }
             });
