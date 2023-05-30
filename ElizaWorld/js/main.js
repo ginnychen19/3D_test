@@ -3,8 +3,8 @@ var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHei
 var renderer = new THREE.WebGLRenderer();
 
 function creatBacisWorld() {
-    let planeWidth = 30;
-    let planeDeep = 30;
+    let planeWidth = 220;
+    let planeDeep = 220;
 
     renderer.setClearColor(new THREE.Color(0xEEEEEE, 1.0));
     renderer.setSize(window.innerWidth, window.innerHeight);
@@ -23,7 +23,7 @@ function creatBacisWorld() {
     var cubeMaterial = new THREE.MeshLambertMaterial({ color: 0xff0000 });
     var cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
     cube.castShadow = true; //設置一個物體是否投射陰影，不透明的物體就不會投射陰影
-    cube.position.set(0, 0, 0)
+    cube.position.set(0, 2, 0)
     scene.add(cube);
 
     //球體
@@ -32,10 +32,15 @@ function creatBacisWorld() {
     var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
     sphere.castShadow = true;
     sphere.receiveShadow = true;
-    sphere.position.set(10, 0, 10);
+    sphere.position.set(5, 4, 15);
     scene.add(sphere);
 }
 function creatLight() {
+    //加霧氣
+    scene.fog = new THREE.Fog(#c4a9a9, 80, 120);
+    var ambiColor = "#ffffff";
+    var ambientLight = new THREE.AmbientLight(ambiColor);
+    scene.add(ambientLight);
     // 加入點光源
     var spotLight = new THREE.SpotLight(0xffffff);
     spotLight.position.set(-40, 60, -10);
@@ -66,16 +71,7 @@ function init() {
     document.getElementById("WebGL-output").appendChild(renderer.domElement);
     //
     var step = 0;
-    var controls = new function () {//加入方形旋轉、和圓球運動的速度
-        this.rotationSpeed = 0.02;
-        this.bouncingSpeed = 0.03;
-    };
-    var gui = new dat.GUI();
-    gui.add(controls, 'rotationSpeed', 0, 0.5);
-    gui.add(controls, 'bouncingSpeed', 0, 0.5);
-
     render();
-   
     function render() {
         stats.update();
         // render using requestAnimationFrame

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Example 08.07 - Load OBJ and MTL </title>
+
+    <script type="text/javascript" src="../libs/three.js"></script>
+    <script type="text/javascript" src="../libs/OBJLoader.js"></script>
+    <script type="text/javascript" src="../libs/stats.js"></script>
+    <script type="text/javascript" src="../libs/dat.gui.js"></script>
+    <script type="text/javascript" src="../libs/OrbitControls.js"></script>
+    <style>
+        body {
+            /* set margin to 0 and overflow to hidden, to go fullscreen */
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="Stats-output">
+    </div>
+    <!-- Div which will hold the Output -->
+    <div id="WebGL-output">
+    </div>
+
+    <!-- Javascript code that runs our Three.js examples -->
+    <script type="text/javascript">
+        function init() {
+            var stats = initStats();
+            var scene = new THREE.Scene();
+            var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            var webGLRenderer = new THREE.WebGLRenderer();
+            webGLRenderer.setClearColor(new THREE.Color(0xaaaaff, 1.0));
+            webGLRenderer.setSize(window.innerWidth, window.innerHeight);
+            webGLRenderer.shadowMapEnabled = true;
+            // position camera
+            camera.position.x = -30;
+            camera.position.y = 40;
+            camera.position.z = 50;
+            camera.lookAt(new THREE.Vector3(0, 10, 0));
+            // 建立 OrbitControls
+            let cameraControl = new THREE.OrbitControls(camera)
+            cameraControl.enableDamping = true // 啟用阻尼效果
+            cameraControl.dampingFactor = 0.25 // 阻尼系數
+            // cameraControl.autoRotate = true    // 啟用鏡頭自動旋轉
+
+            // 創建環境光
+            const ambientLight = new THREE.AmbientLight("#000000", 0.5); // 第一個參數是顏色，第二個參數是光照強度（介於0和1之間）
+            scene.add(ambientLight);
+            // 打光
+            var spotLight = new THREE.SpotLight(0xffffff);
+            spotLight.position.set(0, 40, 30);
+            spotLight.intensity = 2;
+            scene.add(spotLight);
+            document.getElementById("WebGL-output").appendChild(webGLRenderer.domElement);
+            // call the render function
+            var step = 0;
+
+            var mesh;
+            const objectMaterial = new THREE.MeshLambertMaterial({
+                transparent: true,
+                side: THREE.FrontSide,
+                // side: THREE.DoubleSide,
+            });
+            //載入OBJ載入器
+            const loader = new THREE.OBJLoader();
+            //載入貼圖
+            const textureLoader = new THREE.TextureLoader();
+            textureLoader.load('./alpha02.png', function (objectTransparency) {
+                objectMaterial.alphaMap = objectTransparency;
+                objectTransparency.needsUpdate = true;
+
+                loader.load('../assets/ice-cream.obj', function (object) {
+                    object.scale.set(5, 5, 5);
+                    object.traverse(function (child) {
+                        if (child instanceof THREE.Mesh) {
+                            child.material = objectMaterial;
+                        }
+                    });
+                    scene.add(object);
+                });
+            });
+            // const objectTransparency = new THREE.TextureLoader().load('../assets/textures/Myalpha.jpg');
+            // // three.js原文件：https://threejs.org/docs/#api/en/materials/MeshStandardMaterial
+            // const material = new THREE.MeshStandardMaterial({
+            //     transparent: true,
+            //     alphaMap: objectTransparency,
+            //     side: THREE.DoubleSide,
+            // });
+            // // scene.add(objectAlpha);
+
+            render();
+
+
+            function render() {
+                stats.update();
+                cameraControl.update();
+                if (mesh) {
+                    mesh.rotation.y += 0.006;
+                }
+                // render using requestAnimationFrame
+                requestAnimationFrame(render);
+                webGLRenderer.render(scene, camera);
+            }
+
+            function initStats() {
+
+                var stats = new Stats();
+                stats.setMode(0); // 0: fps, 1: ms
+
+
+                // Align top-left
+                stats.domElement.style.position = 'absolute';
+                stats.domElement.style.left = '0px';
+                stats.domElement.style.top = '0px';
+
+                document.getElementById("Stats-output").appendChild(stats.domElement);
+
+                return stats;
+            }
+        }
+        window.onload = init;
+    </script>
+</body>
+
+</html>
