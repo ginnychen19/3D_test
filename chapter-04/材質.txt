@@ -1,3 +1,5 @@
+https://www.hangge.com/blog/cache/detail_1819.html
+https://ithelp.ithome.com.tw/articles/10302686?sc=rss.qu
 【01.基本材質屬性】
          id ▶ 數字們
        uuid ▶ 生成唯一id
