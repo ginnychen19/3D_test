@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "cannon": "github:schteppe/cannon.js",
+    "three": "^0.153.0"
+  },
+  "devDependencies": {
+    "vite": "^4.3.9"
+  }
+}
